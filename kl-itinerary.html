@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KL Itinerary — April 2-5, 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F1F2;&#x1F1FE;</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAF7F2;--surface:#FFFFFF;--surface-alt:#F3EDE4;
+  --border:#E6DED3;--border-light:#F0EAE0;
+  --text:#1A1714;--text-sec:#6B5E52;--text-tri:#9C8E80;
+  --accent:#C17F59;--accent-light:#D4A07A;--gold:#D4A853;
+  --cat-landmark:#4A6FA5;--cat-cultural:#7E5DAC;--cat-neighborhood:#C17F59;
+  --cat-garden:#3D8B7A;--cat-museum:#5C6BC0;--cat-food:#C95D4E;
+  --cat-cafe:#B8883C;--cat-nightlife:#2D7B88;
+  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
+  --shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.04);
+  --shadow-hover:0 8px 30px rgba(139,90,43,0.12);
+  --max-w:1400px;
+  --day-arrival:#2D7B88;--day-1:#C17F59;--day-2:#3D8B7A;--day-3:#4A6FA5;
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+img{max-width:100%;display:block}
+button{cursor:pointer}
+
+.grain{position:fixed;inset:0;pointer-events:none;z-index:10000;opacity:0.018;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px}
+
+/* ====== HERO ====== */
+.hero{position:relative;max-width:var(--max-w);margin:0 auto;padding:0 32px}
+.hero-banner{width:100%;aspect-ratio:21/9;border-radius:var(--radius);overflow:hidden;margin-top:24px;position:relative}
+.hero-banner img{width:100%;height:100%;object-fit:cover}
+.hero-banner-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(26,23,20,0.6) 0%,rgba(26,23,20,0.25) 50%,transparent 100%)}
+.hero-content{position:absolute;bottom:32px;left:36px;color:#fff;z-index:2;max-width:560px}
+.hero-eyebrow{font-size:0.7rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:28px;height:1.5px;background:var(--gold);border-radius:1px}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:700;
+  letter-spacing:-0.03em;line-height:1.05;margin-bottom:10px;text-shadow:0 2px 16px rgba(0,0,0,0.3)}
+.hero-subtitle{font-size:0.92rem;font-weight:300;line-height:1.65;opacity:0.9;text-shadow:0 1px 8px rgba(0,0,0,0.3)}
+.hero-stats{display:flex;gap:24px;margin-top:20px}
+.hero-stat{text-align:center;padding:8px 16px;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);
+  border-radius:var(--radius-xs);border:1px solid rgba(255,255,255,0.15)}
+.hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700}
+.hero-stat-label{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:500;opacity:0.8;margin-top:1px}
+
+/* Meta bar */
+.meta-bar{max-width:var(--max-w);margin:0 auto;padding:16px 32px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.meta-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:100px;
+  font-size:0.78rem;color:var(--text-sec);font-weight:400}
+.meta-chip svg{flex-shrink:0}
+
+/* ====== CONTROLS ====== */
+.controls{position:sticky;top:0;z-index:100;
+  background:rgba(250,247,242,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-light);padding:14px 0}
+.controls-inner{max-width:var(--max-w);margin:0 auto;padding:0 32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:180px;position:relative}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tri);pointer-events:none}
+.search{width:100%;padding:8px 14px 8px 36px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font-size:0.82rem;font-family:inherit;outline:none;transition:border-color 0.2s}
+.search:focus{border-color:var(--accent)}
+.search::placeholder{color:var(--text-tri)}
+.filters-row{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;
+  font-size:0.76rem;font-weight:500;border:1px solid var(--border);background:var(--surface);
+  color:var(--text-sec);cursor:pointer;white-space:nowrap;transition:all 0.2s;font-family:inherit}
+.pill:hover{border-color:var(--accent);color:var(--text)}
+.pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ====== SECTION HEADER ====== */
+.section-header{max-width:var(--max-w);margin:0 auto;padding:32px 32px 20px;text-align:center}
+.section-header h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;margin-bottom:4px}
+.section-header p{font-size:0.88rem;color:var(--text-sec);font-weight:300}
+
+/* ====== DAY GRID ====== */
+.grid-wrap{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.day-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.day-grid[data-cols="1"]{grid-template-columns:1fr}
+.day-grid[data-cols="2"]{grid-template-columns:repeat(2,1fr)}
+.day-grid[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+
+/* Day column */
+.day-col{display:flex;flex-direction:column;gap:0;
+  opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.22,1,0.36,1)}
+.day-col.revealed{opacity:1;transform:translateY(0)}
+.day-col-header{border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;position:relative}
+.day-col-img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block}
+.day-col-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,23,20,0.7) 0%,transparent 60%)}
+.day-col-label{position:absolute;bottom:14px;left:16px;color:#fff;z-index:2}
+.day-col-label h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;line-height:1.15}
+.day-col-label p{font-size:0.68rem;font-weight:400;opacity:0.85;margin-top:2px}
+
+/* Meal summary strip */
+.day-meals{display:flex;gap:6px;padding:8px 14px;background:var(--surface);
+  border-left:1px solid var(--border-light);border-right:1px solid var(--border-light);flex-wrap:wrap}
+.day-meal-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:100px;font-size:0.62rem;font-weight:600;
+  background:rgba(201,93,78,0.08);color:var(--cat-food)}
+
+/* Mini map */
+.day-col-map{height:140px;border-left:1px solid var(--border-light);border-right:1px solid var(--border-light)}
+.day-col-map .leaflet-container{height:100%;width:100%;background:var(--surface-alt)}
+
+/* Stop list */
+.day-col-stops{background:var(--surface);border-left:1px solid var(--border-light);
+  border-right:1px solid var(--border-light);flex:1}
+
+/* Group label */
+.stop-group-label{padding:10px 14px 4px;font-size:0.65rem;font-weight:600;
+  color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;
+  display:flex;align-items:center;gap:8px;border-top:1px solid var(--border-light)}
+.stop-group-label::before{content:'';width:16px;height:1.5px;background:var(--accent);border-radius:1px}
+
+/* OR divider */
+.stop-or{display:flex;align-items:center;justify-content:center;padding:4px 14px;
+  font-size:0.58rem;font-weight:700;color:var(--text-tri);text-transform:uppercase;letter-spacing:0.12em}
+.stop-or::before,.stop-or::after{content:'';flex:1;height:1px;background:var(--border-light);margin:0 8px}
+
+/* Stop item */
+.stop-item{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--border-light);
+  cursor:pointer;transition:background 0.2s;
+  opacity:0;transform:translateX(-8px);transition:opacity 0.35s ease,transform 0.35s ease,background 0.2s}
+.stop-item.revealed{opacity:1;transform:translateX(0)}
+.stop-item:hover{background:var(--surface-alt)}
+.stop-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:4px}
+.stop-item.dimmed{opacity:0.25;pointer-events:none}
+.stop-item.muted .stop-thumb{background:var(--border)!important;font-size:0.52rem}
+.stop-item.muted .stop-name{color:var(--text-tri);font-weight:400}
+.stop-item.muted .stop-desc{display:none}
+.stop-thumb{width:46px;height:46px;border-radius:var(--radius-xs);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:0.6rem;font-weight:700;flex-shrink:0;
+  font-family:'Cormorant Garamond',serif;letter-spacing:-0.02em}
+.stop-info{flex:1;min-width:0}
+.stop-time{font-size:0.65rem;color:var(--text-tri);display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.stop-name{font-size:0.82rem;font-weight:600;color:var(--text);line-height:1.3}
+.stop-desc{font-size:0.72rem;color:var(--text-sec);line-height:1.4;margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.stop-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.stop-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;
+  font-size:0.6rem;font-weight:600;white-space:nowrap}
+.stop-badge-cat{color:#fff}
+.stop-badge-meal{background:rgba(201,93,78,0.1);color:var(--cat-food)}
+.stop-badge-coffee{background:rgba(184,136,60,0.1);color:var(--cat-cafe)}
+.stop-badge-price{background:var(--surface-alt);color:var(--accent)}
+.stop-badge-note{background:rgba(212,168,83,0.12);color:#9A7B2E;font-weight:500}
+
+/* Day summary footer */
+.day-col-summary{padding:14px;background:var(--surface-alt);
+  border-radius:0 0 var(--radius) var(--radius);
+  border:1px solid var(--border-light);border-top:none;display:flex;flex-direction:column;gap:10px}
+.day-summary-item{display:flex;gap:8px;align-items:flex-start;font-size:0.75rem;color:var(--text-sec)}
+.day-summary-item svg{flex-shrink:0;margin-top:2px}
+.day-summary-label{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--text-tri)}
+.day-summary-value{font-size:0.75rem;color:var(--text-sec);line-height:1.4}
+
+/* ====== DETAIL MODAL ====== */
+.stop-detail-overlay{position:fixed;inset:0;z-index:1000;background:rgba(26,23,20,0.45);
+  backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px}
+.stop-detail-overlay.active{display:flex}
+.stop-detail-panel{background:var(--surface);border-radius:var(--radius);max-width:520px;width:100%;
+  max-height:85vh;overflow-y:auto;position:relative;
+  animation:panelIn 0.25s cubic-bezier(0.22,1,0.36,1) both}
+.stop-detail-close{position:absolute;top:12px;right:12px;z-index:10;width:32px;height:32px;
+  border-radius:50%;border:none;background:rgba(0,0,0,0.5);color:#fff;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s}
+.stop-detail-close:hover{background:rgba(0,0,0,0.7)}
+
+/* Carousel */
+.carousel{position:relative;width:100%;aspect-ratio:16/10;background:var(--surface-alt);
+  overflow:hidden;border-radius:var(--radius) var(--radius) 0 0;display:none}
+.carousel img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;
+  opacity:0;transition:opacity 0.45s ease}
+.carousel img.active{opacity:1}
+.carousel-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:3rem;opacity:0.15;color:var(--text-tri)}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;
+  border-radius:50%;border:none;background:rgba(0,0,0,0.4);color:#fff;font-size:1.4rem;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background 0.2s;backdrop-filter:blur(4px)}
+.carousel-btn:hover{background:rgba(0,0,0,0.6)}
+.carousel-btn.prev{left:10px}
+.carousel-btn.next{right:10px}
+.carousel-dots{display:flex;justify-content:center;gap:6px;padding:10px 0}
+.carousel-dot{width:7px;height:7px;border-radius:50%;border:none;
+  background:var(--border);cursor:pointer;transition:all 0.2s;padding:0}
+.carousel-dot.active{background:var(--accent);transform:scale(1.3)}
+
+.stop-detail-content{padding:24px}
+.stop-detail-day{font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.stop-detail-name{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;line-height:1.15;margin-bottom:8px}
+.stop-detail-desc{font-size:0.88rem;color:var(--text-sec);line-height:1.65;margin-bottom:16px}
+.stop-detail-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.stop-detail-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;
+  border-radius:100px;font-size:0.7rem;font-weight:600}
+.stop-detail-dist{font-size:0.72rem;color:var(--text-tri);display:inline-flex;align-items:center;gap:4px}
+.stop-detail-tip{background:rgba(212,168,83,0.08);border-left:3px solid var(--gold);
+  padding:12px 16px;border-radius:0 var(--radius-xs) var(--radius-xs) 0;
+  font-size:0.82rem;color:var(--text-sec);line-height:1.55;margin-bottom:16px;
+  display:flex;gap:8px;align-items:flex-start}
+.stop-detail-tip svg{flex-shrink:0;margin-top:2px;color:var(--gold)}
+.stop-detail-actions{display:flex;gap:10px;flex-wrap:wrap}
+.stop-detail-link{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;
+  border-radius:100px;font-size:0.78rem;font-weight:600;
+  background:var(--accent);color:#fff;transition:opacity 0.2s}
+.stop-detail-link:hover{opacity:0.9}
+
+/* ====== FOOD TABLE ====== */
+.food-section{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.food-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.food-table{width:100%;border-collapse:collapse;min-width:560px}
+.food-table th{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--text-tri);font-weight:600;text-align:left;padding:10px 14px;
+  border-bottom:2px solid var(--border);white-space:nowrap}
+.food-table td{padding:12px 14px;font-size:0.82rem;border-bottom:1px solid var(--border-light);
+  color:var(--text-sec)}
+.food-table tr:hover td{background:var(--surface-alt)}
+.food-table td:first-child{font-weight:600;color:var(--text);white-space:nowrap}
+.food-table td:nth-child(2){color:var(--accent);font-weight:500}
+.food-table td:last-child{white-space:nowrap;font-weight:500}
+
+/* ====== SNACKS ====== */
+.snacks-section{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.snacks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.snack-card{background:var(--surface);border-radius:var(--radius-sm);padding:18px;
+  border:1px solid var(--border-light);display:flex;gap:12px;align-items:flex-start;
+  transition:border-color 0.2s}
+.snack-card:hover{border-color:var(--accent)}
+.snack-icon{width:36px;height:36px;border-radius:var(--radius-xs);background:rgba(212,168,83,0.1);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold)}
+.snack-name{font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.snack-desc{font-size:0.75rem;color:var(--text-sec);line-height:1.5}
+
+/* ====== NOTES ====== */
+.notes-section{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.note-card{background:var(--surface);border-radius:var(--radius-sm);padding:16px;
+  border:1px solid var(--border-light);display:flex;gap:12px;align-items:flex-start}
+.note-icon{width:32px;height:32px;border-radius:var(--radius-xs);background:var(--surface-alt);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-sec);font-size:0.9rem}
+.note-text{font-size:0.82rem;color:var(--text-sec);line-height:1.55}
+.note-text strong{color:var(--text);font-weight:600}
+
+/* ====== SKIPPED ====== */
+.skipped-section{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.skipped-toggle{cursor:pointer;user-select:none;display:flex;align-items:center;
+  justify-content:center;gap:8px;padding:16px;text-align:center}
+.skipped-toggle h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700}
+.skipped-chevron{transition:transform 0.3s ease;color:var(--text-tri)}
+.skipped-list{max-height:0;overflow:hidden;transition:max-height 0.4s ease;
+  background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border-light)}
+.skipped-list.open{max-height:600px;margin-top:12px}
+.skipped-item{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 18px;border-bottom:1px solid var(--border-light);gap:12px}
+.skipped-item:last-child{border-bottom:none}
+.skipped-name{font-size:0.85rem;font-weight:600;color:var(--text)}
+.skipped-reason{font-size:0.78rem;color:var(--text-tri);text-align:right;flex-shrink:0}
+
+/* ====== MAP SECTION ====== */
+.map-section{max-width:var(--max-w);margin:0 auto;padding:0 32px 48px}
+.map-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;text-align:center;margin-bottom:20px}
+.map-container{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);height:420px}
+.map-container .leaflet-container{height:100%;width:100%}
+.map-legend{display:flex;justify-content:center;gap:20px;padding:14px 0;flex-wrap:wrap}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--text-sec)}
+.map-legend-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.popup-name{font-weight:600;font-size:0.85rem;margin-bottom:2px}
+.popup-time{font-size:0.72rem;color:var(--text-tri)}
+.popup-link{display:inline-block;margin-top:4px;font-size:0.72rem;color:var(--accent);font-weight:500}
+
+/* ====== FOOTER ====== */
+.footer{max-width:var(--max-w);margin:0 auto;padding:32px;text-align:center;
+  border-top:1px solid var(--border-light)}
+.footer p{font-size:0.75rem;color:var(--text-tri)}
+
+/* ====== RESPONSIVE ====== */
+@media(max-width:1100px){
+  .day-grid,.day-grid[data-cols="3"],.day-grid[data-cols="4"]{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .hero{padding:0 16px}
+  .hero-banner{aspect-ratio:16/9;margin-top:16px}
+  .hero-title{font-size:2.2rem}
+  .hero-content{bottom:20px;left:20px}
+  .hero-stats{gap:12px}
+  .hero-stat{padding:6px 10px}
+  .hero-stat-num{font-size:1.2rem}
+  .meta-bar{padding:12px 16px}
+  .controls-inner{padding:0 16px}
+  .section-header{padding:24px 16px 16px}
+  .grid-wrap,.food-section,.snacks-section,.notes-section,.skipped-section,.map-section{padding-left:16px;padding-right:16px}
+  .day-grid,.day-grid[data-cols]{grid-template-columns:1fr}
+  .day-col-map{height:120px}
+  .map-container{height:320px}
+  .stop-detail-panel{max-width:100%;max-height:90vh;border-radius:var(--radius) var(--radius) 0 0;
+    align-self:flex-end}
+  .stop-detail-overlay{align-items:flex-end;padding:0}
+}
+@media(max-width:480px){
+  .hero-title{font-size:1.8rem}
+  .hero-stats{flex-wrap:wrap}
+  .controls-inner{flex-direction:column;gap:8px}
+  .filters-row{width:100%;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+  .filters-row::-webkit-scrollbar{display:none}
+  .search-wrap{min-width:100%}
+}
+
+/* ====== PRINT ====== */
+@media print{
+  .grain,.controls,.meta-bar,.map-section,.stop-detail-overlay,.carousel,.carousel-dots{display:none!important}
+  .day-grid{grid-template-columns:1fr 1fr}
+  .day-col{opacity:1!important;transform:none!important}
+  .stop-item{opacity:1!important;transform:none!important}
+  .day-col-map{display:none}
+  body{background:#fff}
+  .skipped-list{max-height:none!important;display:block}
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes panelIn{from{opacity:0;transform:scale(0.97) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .day-col,.stop-item{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ====== HERO ====== -->
+<header class="hero">
+  <div class="hero-banner">
+    <img src="images/hero-banner.png" alt="Kuala Lumpur skyline" loading="eager">
+    <div class="hero-banner-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Your Itinerary</div>
+      <h1 class="hero-title">Kuala Lumpur</h1>
+      <p class="hero-subtitle">Hidden gems, hole-in-the-wall food, and the real KL behind the towers. April 2-5, 2026.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Days</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="statStops">0</div><div class="hero-stat-label">Stops</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="statMeals">0</div><div class="hero-stat-label">Meals</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="statHood">7</div><div class="hero-stat-label">Neighborhoods</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Meta bar -->
+<div class="meta-bar">
+  <span class="meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Apr 2-5, 2026</span>
+  <span class="meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Novotel KL City Centre</span>
+  <span class="meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72"/></svg> DMK &rarr; KUL &rarr; DMK</span>
+</div>
+
+<!-- ====== CONTROLS ====== -->
+<nav class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="search" id="searchInput" placeholder="Search stops, food, neighborhoods...">
+    </div>
+    <div class="filters-row" id="dayFilters"></div>
+  </div>
+</nav>
+
+<!-- ====== DAY GRID ====== -->
+<div class="section-header">
+  <h2>Your Day-by-Day Plan</h2>
+  <p>Click any stop for details, tips, and directions</p>
+</div>
+<div class="grid-wrap">
+  <div class="day-grid" id="dayGrid"></div>
+</div>
+
+<!-- ====== FOOD TABLE ====== -->
+<section class="food-section">
+  <div class="section-header" style="padding-left:0;padding-right:0"><h2>Food Quick Reference</h2></div>
+  <div class="food-table-wrap"><table class="food-table" id="foodTable"></table></div>
+</section>
+
+<!-- ====== BONUS SNACKS ====== -->
+<section class="snacks-section">
+  <div class="section-header" style="padding-left:0;padding-right:0">
+    <h2>Bonus Snack Stops</h2>
+    <p>Fit these in anywhere during the trip</p>
+  </div>
+  <div class="snacks-grid" id="snacksGrid"></div>
+</section>
+
+<!-- ====== PRACTICAL NOTES ====== -->
+<section class="notes-section">
+  <div class="section-header" style="padding-left:0;padding-right:0"><h2>Practical Notes</h2></div>
+  <div class="notes-grid" id="notesGrid"></div>
+</section>
+
+<!-- ====== SKIPPED ====== -->
+<section class="skipped-section">
+  <div class="skipped-toggle" onclick="toggleSkipped()">
+    <h2>Skipped (and Why)</h2>
+    <svg class="skipped-chevron" id="skippedChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+  <div class="skipped-list" id="skippedList"></div>
+</section>
+
+<!-- ====== MAP ====== -->
+<section class="map-section">
+  <h2>All Stops at a Glance</h2>
+  <div class="map-container"><div id="map"></div></div>
+  <div class="map-legend">
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#D4A853"></div>Hotel</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#2D7B88"></div>Arrival</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#C17F59"></div>Day 1</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#3D8B7A"></div>Day 2</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#4A6FA5"></div>Day 3</div>
+  </div>
+</section>
+
+<footer class="footer"><p>KL Itinerary &middot; April 2-5, 2026 &middot; Built with care</p></footer>
+
+<!-- ====== DETAIL MODAL ====== -->
+<div class="stop-detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+  <div class="stop-detail-panel" id="detailPanel">
+    <button class="stop-detail-close" onclick="event.stopPropagation();closeDetail()" aria-label="Close">&times;</button>
+    <div class="carousel" id="carousel"></div>
+    <div class="carousel-dots" id="carouselDots"></div>
+    <div class="stop-detail-content" id="detailContent"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ====================================================================
+   DATA
+   ==================================================================== */
+const HOTEL={lat:3.1555,lng:101.7140,name:"Novotel KL City Centre",address:"2 Jalan Kia Peng"};
+
+const DAYS=[
+{
+  id:"arrival",dayLabel:"Arrival",date:"Thu, April 2",theme:"Chinatown & Kampung Baru",
+  color:"#2D7B88",img:"images/day0-arrival.png",headerImg:"images/day0-arrival.png",
+  summary:{distance:"~5 km",highlights:"Sin Sze Si Ya Temple, Kwai Chai Hong, Satay Zulkifli"},
+  stops:[
+    {time:"1:20 PM",name:"Land at KLIA",desc:"Flight from DMK, departed 10:05am.",
+     transport:{type:"train",text:"KLIA Ekspres to KL Sentral (28 min, RM55), then Grab to hotel"}},
+    {time:"~2:30 PM",name:"Check in at Novotel",desc:"Drop bags, freshen up. Ready to go.",
+     lat:3.1555,lng:101.7140},
+    {time:"3:00 PM",name:"Sin Sze Si Ya Temple",desc:"KL's oldest Taoist temple (1864), built by city founder Yap Ah Loy. Dark, incense-heavy interior with original altar.",
+     cat:"cultural",crowd:1,lat:3.1453,lng:101.6972,group:"chinatown",
+     tips:"Most tourists walk right past it on Jalan Tun HS Lee. Stunning wood carvings and deity statues.",
+     wiki:"Sin Sze Si Ya Temple",transport:{type:"grab",text:"Grab from hotel to Chinatown, 10 min"}},
+    {time:"3:30 PM",name:"Kwai Chai Hong",desc:"Restored pre-war alley with murals depicting 1960s daily life. QR codes for audio stories. Name means 'Little Demon Alley.'",
+     cat:"neighborhood",crowd:2,lat:3.1443,lng:101.6973,group:"chinatown",
+     tips:"Weekday late afternoon for best photos. Connected to hidden restaurants and bars.",
+     wiki:"Kwai Chai Hong"},
+    {time:"4:00 PM",name:"Lah Lah Land",desc:"The souvenir shop. Graphic tees ('Roti Canai Connoisseur'), postcards, modern Malaysian design.",
+     cat:"neighborhood",crowd:2,lat:3.1448,lng:101.6968,group:"chinatown",
+     tips:"Better than generic Petaling Street magnets. Quick stop."},
+    {time:"4:30 PM",name:"REXKL",desc:"Vintage shops, bookstores, cafes in a repurposed heritage cinema. Browse and absorb.",
+     cat:"neighborhood",crowd:2,lat:3.1458,lng:101.6958,group:"chinatown",
+     tips:"Art exhibitions rotate regularly. Good cafe inside for a breather.",wiki:"REXKL"},
+    {time:"5:30 PM",name:"Satay Zulkifli",desc:"Beef/lamb satay RM1.30/stick, charcoal-grilled. Lamb satay is the star.",
+     cat:"food",crowd:3,lat:3.1615,lng:101.7005,meal:true,price:"RM1.30/stick",
+     tips:"Opens 3pm, busiest 7-10pm. 20 sticks for under RM30. The satay smoke at dusk is peak KL.",
+     wiki:"Satay Malaysia",transport:{type:"grab",text:"Grab from Chinatown to Kampung Baru, ~10 min"}},
+    {time:"6:30 PM",name:"Nasi Lemak Wanjo",desc:"Est. 1963. Beef rendang + legendary sambal. Or try rival Antarabangsa (est. 1973) next door.",
+     cat:"food",crowd:3,lat:3.1618,lng:101.7002,meal:true,price:"RM8-12",
+     tips:"The sambal is legendary. Get beef rendang add-on. Try both if hungry — they're next door.",
+     wiki:"Nasi lemak"},
+    {time:"8:30 PM",name:"Back to hotel",desc:"Save evening energy for April 4. Jet lag buffer."}
+  ]
+},
+{
+  id:"day1",dayLabel:"Day 1",date:"Fri, April 3",theme:"Caves, Canopy & Colonial",
+  color:"#C17F59",img:"images/day1-city.png",headerImg:"images/day1-heritage.png",
+  summary:{distance:"~10 km",highlights:"Batu Caves, KL Forest Eco Park, Merdeka Square, Chow Kit"},
+  stops:[
+    {time:"7:00 AM",name:"Breakfast at Hotel",desc:"Novotel buffet. Fuel up for a big day.",muted:true},
+    {time:"7:30 AM",name:"Batu Caves",desc:"272 rainbow steps up to cave temples and Lord Murugan statue. Go early to beat the crowd wave.",
+     cat:"landmark",crowd:2,lat:3.2379,lng:101.6840,
+     tips:"Arrive before 8am to beat tour buses. Main cave is free. Watch for macaques — they snatch food.",
+     wiki:"Batu Caves",transport:{type:"train",text:"KTM Komuter from KL Sentral (~30 min, under RM3). Or Grab direct (~25-35 min, RM15-25)."}},
+    {time:"10:30 AM",name:"KL Forest Eco Park",desc:"120-year-old rainforest wedged between skyscrapers. Canopy walkway with city views. Free entry.",
+     cat:"garden",crowd:1,lat:3.1510,lng:101.7010,
+     tips:"Air drops several degrees inside. KL Tower visible from trails. 30-45 min. Walk from Bukit Nanas Monorail.",
+     wiki:"KL Forest Eco Park Bukit Nanas"},
+    {time:"12:00 PM",name:"Soong Kee Beef Ball Noodles",desc:"Original since 1945. Hakka-style minced beef sauce over egg noodles, legendary handmade beef balls.",
+     cat:"food",crowd:3,lat:3.1450,lng:101.6965,meal:true,price:"RM8-12",
+     tips:"Queue is part of the deal. Opposite UOB Bank on Jalan Tun HS Lee. Follow the slurping sound.",
+     wiki:"Beef ball noodle"},
+    {time:"12:00 PM",name:"Nam Heong",desc:"Michelin-recognized, RM40 for two. Locals' pick over the tourist-famous spots.",
+     cat:"food",crowd:3,lat:3.1452,lng:101.6955,meal:true,price:"~RM40/two",altOf:"lunch",
+     tips:"If you want a wider spread instead of noodles. Good wonton and chicken rice."},
+    {time:"1:30 PM",name:"KL City Gallery",desc:"Architectural scale model of KL, historical exhibits. Good for spatial context of the whole city.",
+     cat:"museum",crowd:2,lat:3.1487,lng:101.6941,group:"merdeka",price:"RM10",
+     tips:"45 min is enough. The miniature city model is the highlight.",
+     wiki:"KL City Gallery Kuala Lumpur"},
+    {time:"2:00 PM",name:"Sultan Abdul Samad Building",desc:"Moorish arches, 1897. Just reopened Feb 2026 after major restoration. Where independence was declared.",
+     cat:"cultural",crowd:2,lat:3.1488,lng:101.6945,group:"merdeka",
+     tips:"Now houses cafes, galleries, and a nonya kebaya boutique. The restoration is beautifully done.",
+     wiki:"Sultan Abdul Samad Building"},
+    {time:"2:30 PM",name:"National Textile Museum",desc:"Mughal-style building (1896). Malaysia's textile heritage — Malay, Chinese, Indian fabrics. Free entry.",
+     cat:"museum",crowd:1,lat:3.1493,lng:101.6938,group:"merdeka",
+     tips:"Virtually no visitors. Beautiful building alone is worth the stop.",
+     wiki:"National Textile Museum Malaysia"},
+    {time:"3:00 PM",name:"Masjid Jamek",desc:"KL's oldest mosque (1909) at the confluence of the Klang and Gombak rivers — the exact spot KL was founded.",
+     cat:"cultural",crowd:2,lat:3.1490,lng:101.6960,group:"merdeka",
+     tips:"Recently restored with landscaping and fountains. Free modest clothing available on-site.",
+     wiki:"Jamek Mosque",note:"Friday — visit after 2:30pm to avoid Jumu'ah prayers"},
+    {time:"6:00 PM",name:"Limapulo",desc:"Nyonya cuisine in Chow Kit. Local following, not a tourist destination.",
+     cat:"food",crowd:2,lat:3.1655,lng:101.6985,meal:true,price:"Moderate",
+     tips:"Chow Kit is the neighborhood both locals and reels creators recommend most.",
+     transport:{type:"grab",text:"Grab from Merdeka area, ~10 min"}},
+    {time:"6:00 PM",name:"Restoran Heng Kee",desc:"Bak kut teh — get the dry version. Fragrant and rich. Locals vote this over tourist-famous spots.",
+     cat:"food",crowd:2,lat:3.1660,lng:101.6975,meal:true,price:"Moderate",altOf:"dinner"}
+  ]
+},
+{
+  id:"day2",dayLabel:"Day 2",date:"Sat, April 4",theme:"Museums, Gardens & Speakeasy",
+  color:"#3D8B7A",img:"images/day2-culture.png",headerImg:"images/day2-culture.png",
+  summary:{distance:"~8 km",highlights:"Islamic Arts Museum, Perdana Gardens, Zhongshan Building, PS150"},
+  stops:[
+    {time:"7:30 AM",name:"Breakfast at Hotel",desc:"Novotel buffet.",muted:true},
+    {time:"9:00 AM",name:"National Museum",desc:"Malaysian history from prehistory to independence. Perak Man skeleton and colonial galleries are the highlights.",
+     cat:"museum",crowd:2,lat:3.1375,lng:101.6870,price:"RM5",
+     tips:"1.5 hours is enough. Opens at 9am. Good orientation to Malaysian history.",
+     wiki:"National Museum Malaysia",transport:{type:"grab",text:"Grab from hotel, ~12 min"}},
+    {time:"11:00 AM",name:"Rumah Penghulu Abu Seman",desc:"Traditional Malay wooden heritage house. Intimate guided tour — the one exception to the no-tours rule.",
+     cat:"cultural",crowd:1,lat:3.1538,lng:101.7042,price:"RM20",
+     tips:"45 min guided tour at 11am. The only way in, and genuinely worth it. Rare and uncrowded.",
+     wiki:"Rumah Penghulu Abu Seman",note:"Only viable day — closed Sunday and Monday",
+     transport:{type:"grab",text:"Grab from National Museum, ~10 min"}},
+    {time:"12:00 PM",name:"Islamic Arts Museum Malaysia",desc:"Largest in Southeast Asia. 7,000+ artifacts. The mosque architectural models gallery alone is worth entry.",
+     cat:"museum",crowd:2,lat:3.1420,lng:101.6908,
+     tips:"Adjacent to Perdana Gardens so the geography flows naturally. Allow 1.5-2 hours.",
+     wiki:"Islamic Arts Museum Malaysia",transport:{type:"grab",text:"Grab, ~8 min"}},
+    {time:"1:30 PM",name:"Heung Ki",desc:"Clay pot chicken rice. Simple, satisfying, cheap.",
+     cat:"food",crowd:2,lat:3.1440,lng:101.6960,meal:true,price:"Cheap",
+     tips:"Or grab lunch near the museum area. Clay pot rice is a KL comfort classic."},
+    {time:"2:30 PM",name:"Perdana Botanical Garden",desc:"Orchid Garden (800 varieties), shaded trails, fountains. April heat makes the shade welcome.",
+     cat:"garden",crowd:2,lat:3.1435,lng:101.6871,
+     tips:"Low crowd on Saturday afternoon. The Orchid Garden is the highlight. Free entry.",
+     wiki:"Perdana Botanical Gardens"},
+    {time:"3:30 PM",name:"Seri Negara",desc:"Colonial mansion (1913), reopened Dec 2025. Galleries on Malaysia's journey to independence. Once hosted Queen Elizabeth II.",
+     cat:"museum",crowd:1,lat:3.1415,lng:101.6890,
+     tips:"Bonus if time allows. Near Perdana Gardens. Recently restored.",
+     wiki:"Seri Negara"},
+    {time:"5:00 PM",name:"Zhongshan Building",desc:"1950s arts hub — OUR ArtProjects gallery, Tandang Records (vinyl), Tommy le Baker, indie bookstores.",
+     cat:"neighborhood",crowd:1,lat:3.1380,lng:101.6920,
+     tips:"The creative heart of KL's indie scene. Quiet residential neighborhood. An hour is enough.",
+     wiki:"Zhongshan Building Kuala Lumpur",transport:{type:"grab",text:"Grab from Perdana area, ~10 min"}},
+    {time:"7:30 PM",name:"PS150",desc:"Chinatown speakeasy — looks like an old toy shop from outside. Bangkok-coded. Penrose if you want more upmarket.",
+     cat:"nightlife",crowd:2,lat:3.1450,lng:101.6968,
+     tips:"Chinatown transforms at night into a speakeasy district. Low-key, right vibe.",
+     transport:{type:"grab",text:"Grab from Zhongshan, ~10 min"}}
+  ]
+},
+{
+  id:"day3",dayLabel:"Day 3",date:"Sun, April 5",theme:"Markets, Temples & Departure",
+  color:"#4A6FA5",img:"images/day3-modern.png",headerImg:"images/day3-modern.png",
+  summary:{distance:"~6 km",highlights:"Chow Kit Market, Bank Negara, Brickfields temples, banana leaf rice"},
+  stops:[
+    {time:"7:30 AM",name:"Breakfast at Hotel",desc:"Novotel buffet. Last morning.",muted:true},
+    {time:"8:30 AM",name:"Chow Kit Wet Market",desc:"KL's largest wet market. Fresh herbs, spices, tropical fruits. 100% local — zero tourists.",
+     cat:"neighborhood",crowd:3,lat:3.1650,lng:101.6980,
+     tips:"30-45 min walk-through. Don't photograph without asking. Market runs 6am-2pm.",
+     wiki:"Chow Kit Kuala Lumpur",transport:{type:"grab",text:"Grab from hotel, ~8 min"}},
+    {time:"10:00 AM",name:"Bank Negara Museum",desc:"Most underrated museum in KL. Monetary and economic history done with real craft. Almost zero tourists.",
+     cat:"museum",crowd:1,lat:3.1505,lng:101.6938,
+     tips:"Near KL Sentral — flows toward your airport direction. Free entry.",
+     wiki:"Bank Negara Malaysia Museum",transport:{type:"grab",text:"Grab from Chow Kit, ~10 min"}},
+    {time:"11:30 AM",name:"Sri Kandaswamy Temple",desc:"South Indian Dravidian-style gopuram covered in colorful Hindu deity sculptures.",
+     cat:"cultural",crowd:1,lat:3.1325,lng:101.6872,group:"brickfields",
+     tips:"Walk from KL Sentral (10 min). Located in Brickfields / Little India.",
+     wiki:"Sri Kandaswamy Temple Brickfields",transport:{type:"grab",text:"Grab from Bank Negara, ~8 min"}},
+    {time:"12:00 PM",name:"Buddhist Maha Vihara",desc:"One of KL's oldest Buddhist temples. Peaceful grounds, serene meditation hall.",
+     cat:"cultural",crowd:1,lat:3.1310,lng:101.6868,group:"brickfields",
+     tips:"Sinhalese community temple. Any weekday is quiet. 5 min walk from Sri Kandaswamy.",
+     wiki:"Buddhist Maha Vihara"},
+    {time:"12:30 PM",name:"Lawanya Food Corner",desc:"Family-run 30+ years. Mutton curry is exceptional. Best thosai in KL. Home-cooked curries in clay pots.",
+     cat:"food",crowd:2,lat:3.1320,lng:101.6870,meal:true,price:"Under RM5",
+     tips:"Arrive by 11:30am for lunch rush. Meals under RM5. The thosai is paper-crisp perfection."},
+    {time:"12:30 PM",name:"Vishal Food & Catering",desc:"Banana leaf rice RM6.80 with 3 side dishes. Legit South Indian home-cooking. No pretense.",
+     cat:"food",crowd:2,lat:3.1322,lng:101.6875,meal:true,price:"RM6.80",altOf:"lunch",
+     tips:"Quiet street near the Indian temple. Under RM7 for a full banana leaf spread."},
+    {time:"2:00 PM",name:"Back to hotel",desc:"Pack up. Final packing — passport, boarding pass, power bank.",
+     lat:3.1555,lng:101.7140},
+    {time:"4:00 PM",name:"KLIA Ekspres to Airport",desc:"KL Sentral to KLIA. 28 min, RM55. Flight at 7:40pm.",
+     transport:{type:"train",text:"KLIA Ekspres from KL Sentral (28 min, RM55). Arrive 2.5 hrs early."}}
+  ]
+}
+];
+
+const FOOD_REF=[
+  {day:"Apr 2",meal:"Dinner",spot:"Satay Zulkifli, Kampung Baru",order:"Beef/lamb satay + peanut sauce",price:"RM15-25"},
+  {day:"Apr 2",meal:"Dinner",spot:"Nasi Lemak Wanjo",order:"Beef rendang, sambal",price:"RM8-12"},
+  {day:"Apr 3",meal:"Lunch",spot:"Soong Kee Beef Ball Noodles",order:"Dry beef noodles + beef ball broth",price:"RM8-12"},
+  {day:"Apr 3",meal:"Lunch (alt)",spot:"Nam Heong",order:"Dealer's choice",price:"~RM40/two"},
+  {day:"Apr 3",meal:"Dinner",spot:"Limapulo, Chow Kit",order:"Nyonya dishes",price:"Moderate"},
+  {day:"Apr 3",meal:"Dinner (alt)",spot:"Restoran Heng Kee",order:"Dry bak kut teh",price:"Moderate"},
+  {day:"Apr 4",meal:"Lunch",spot:"Heung Ki",order:"Clay pot chicken rice",price:"Cheap"},
+  {day:"Apr 5",meal:"Lunch",spot:"Lawanya Food Corner",order:"Banana leaf rice, mutton curry, thosai",price:"Under RM5"}
+];
+
+const BONUS_SNACKS=[
+  {name:"Ho Kow Hainam Kopitiam",desc:"Traditional kopitiam, RM8.50 for two. Good mid-morning pitstop if you need a reset.",icon:"coffee"},
+  {name:"NZ Curry House",desc:"Jalan Ampang, walkable from Novotel. Roti canai with dhal. Open 24hrs — good for late-night cravings.",icon:"food"},
+  {name:"Sham",desc:"Half coffee, half tea with condensed milk. The signature kopitiam drink. Try it at any mamak or kopitiam.",icon:"cup"}
+];
+
+const SKIPPED=[
+  {name:"Fei Fei Crab / Dai Tao Lala Pot",reason:"Seafood"},
+  {name:"Village Park / TNR",reason:"Too far (Damansara/PJ)"},
+  {name:"Jalan Alor",reason:"Touristy, crowded"},
+  {name:"Urmu Gallery / Wet Deck rooftop",reason:"Not the vibe"},
+  {name:"Chin Swee Caves Temple",reason:"Day trip to Genting, no time"},
+  {name:"Cafe crawl",reason:"Neutral on coffee"},
+  {name:"Durian Montang",reason:"Niche, tight schedule"},
+  {name:"PJ / SS2 area",reason:"Separate city, no time"}
+];
+
+const PRACTICAL_NOTES=[
+  {icon:"grab",text:"<strong>Grab</strong> is the ride-hailing app. Use it for everything outside walking distance."},
+  {icon:"train",text:"<strong>KLIA Ekspres</strong> from KL Sentral to airport: 28 min, RM55 one-way."},
+  {icon:"money",text:"<strong>RM40 feeds two people</strong> at a Michelin-recognized spot. Budget goes very far."},
+  {icon:"mosque",text:"<strong>Friday mosque access:</strong> Masjid Jamek limited during Jumu'ah prayers (~12:30-2pm)."},
+  {icon:"house",text:"<strong>Rumah Penghulu Abu Seman:</strong> Closed Sunday and Monday. April 4 (Saturday) is the only viable day."},
+  {icon:"market",text:"<strong>Chow Kit Wet Market:</strong> Daily 6am-2pm. Go before 10am for full selection."},
+  {icon:"sun",text:"<strong>Dessert stops are essential.</strong> KL is hot. Plan for them between outdoor walks."}
+];
+
+const CAT_COLORS={landmark:"#4A6FA5",cultural:"#7E5DAC",neighborhood:"#C17F59",garden:"#3D8B7A",museum:"#5C6BC0",food:"#C95D4E",cafe:"#B8883C",nightlife:"#2D7B88"};
+const CROWD_LABELS={1:"Quiet",2:"Low",3:"Moderate",4:"Busy"};
+
+const ICONS={
+  clock:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  food:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>`,
+  coffee:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 8h1a4 4 0 110 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4z"/></svg>`,
+  pin:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  tip:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  route:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l4-4 4 4 4-4 4 4"/></svg>`,
+  star:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  distance:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  warn:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`
+};
+
+const NOTE_ICONS={
+  grab:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+  train:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="M8 19l-2 3"/><path d="M16 19l2 3"/></svg>`,
+  money:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
+  mosque:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c-1.5 2-3 4-3 6a3 3 0 006 0c0-2-1.5-4-3-6z"/><rect x="3" y="14" width="18" height="7" rx="1"/><path d="M3 14l9-3 9 3"/></svg>`,
+  house:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>`,
+  market:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>`,
+  sun:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+};
+
+const SNACK_ICONS={
+  coffee:ICONS.coffee,
+  food:ICONS.food,
+  cup:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 8h1a4 4 0 110 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`
+};
+
+/* ====================================================================
+   STATE
+   ==================================================================== */
+let searchQuery="";
+let activeDay="all";
+let carouselIndex=0;
+const imgCache={};
+
+/* ====================================================================
+   UTILITIES
+   ==================================================================== */
+function getDist(lat1,lng1,lat2,lng2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function formatDist(km){return km<1?(km*1000).toFixed(0)+'m':km.toFixed(1)+'km'}
+function mapsUrl(lat,lng){return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+
+async function fetchWikiImages(query){
+  try{
+    const url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(query)}&gsrlimit=8&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=800&format=json&origin=*`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(!data.query?.pages) return [];
+    return Object.values(data.query.pages)
+      .filter(page=>{
+        const info=page.imageinfo?.[0];
+        if(!info) return false;
+        if(!info.mime?.startsWith("image/jpeg")&&!info.mime?.startsWith("image/png")) return false;
+        if(info.width<400||info.height<300) return false;
+        const t=(page.title||"").toLowerCase();
+        if(/icon|logo|map|diagram|flag|coat.?of.?arms|seal|emblem|symbol|watermark|stub|placeholder/.test(t)) return false;
+        return true;
+      })
+      .sort((a,b)=>(b.imageinfo[0].width||0)-(a.imageinfo[0].width||0))
+      .slice(0,4)
+      .map(page=>page.imageinfo[0].thumburl||page.imageinfo[0].url);
+  }catch(e){return []}
+}
+
+/* ====================================================================
+   SCROLL REVEAL
+   ==================================================================== */
+const revealObs=new IntersectionObserver((entries)=>{
+  const visible=entries.filter(e=>e.isIntersecting);
+  visible.forEach((entry,i)=>{
+    setTimeout(()=>entry.target.classList.add('revealed'),i*60);
+    revealObs.unobserve(entry.target);
+  });
+},{threshold:0.05,rootMargin:'40px'});
+
+function observeReveal(){
+  document.querySelectorAll('.day-col:not(.revealed),.stop-item:not(.revealed),.note-card:not(.revealed),.snack-card:not(.revealed)')
+    .forEach(el=>revealObs.observe(el));
+}
+
+/* ====================================================================
+   CONTROLS
+   ==================================================================== */
+function renderDayFilters(){
+  const pills=[{id:"all",label:"All"},...DAYS.map(d=>({id:d.id,label:d.dayLabel,color:d.color}))];
+  document.getElementById('dayFilters').innerHTML=pills.map(p=>{
+    const dot=p.color?`<span class="pill-dot" style="background:${p.color}"></span>`:'';
+    return `<button class="pill ${p.id===activeDay?'active':''}" onclick="filterDay('${p.id}')">${dot}${p.label}</button>`;
+  }).join('');
+}
+
+function filterDay(id){
+  activeDay=id;
+  renderDayFilters();
+  renderGrid();
+}
+
+document.getElementById('searchInput').addEventListener('input',e=>{
+  searchQuery=e.target.value.toLowerCase().trim();
+  renderGrid();
+});
+
+/* ====================================================================
+   RENDER DAY GRID
+   ==================================================================== */
+function renderGrid(){
+  const grid=document.getElementById('dayGrid');
+  const days=activeDay==='all'?DAYS:DAYS.filter(d=>d.id===activeDay);
+  let html='';
+
+  days.forEach((day,di)=>{
+    html+=`<div class="day-col">`;
+
+    // Header image
+    html+=`<div class="day-col-header">
+      <img class="day-col-img" src="${day.headerImg||day.img}" alt="${day.dayLabel}" loading="${di===0?'eager':'lazy'}">
+      <div class="day-col-img-overlay"></div>
+      <div class="day-col-label">
+        <h3>${day.dayLabel}</h3>
+        <p>${day.theme} &middot; ${day.date}</p>
+      </div>
+    </div>`;
+
+    // Meal summary
+    const meals=day.stops.filter(s=>s.meal===true);
+    if(meals.length>0){
+      html+=`<div class="day-meals">`;
+      html+=`<span class="day-meal-chip">${ICONS.food} ${meals.length} meal${meals.length>1?'s':''}</span>`;
+      html+=`</div>`;
+    }
+
+    // Mini map
+    html+=`<div class="day-col-map" id="minimap-${day.id}"></div>`;
+
+    // Stop list
+    html+=`<div class="day-col-stops">`;
+    let lastGroup=null;
+    day.stops.forEach((stop,si)=>{
+      // OR divider
+      if(stop.altOf){
+        html+=`<div class="stop-or">or</div>`;
+      }
+      // Group label
+      if(stop.group&&stop.group!==lastGroup&&!stop.altOf){
+        const groupLabels={chinatown:"Chinatown Circuit — All Walkable",merdeka:"Merdeka Square Cluster — All Walkable",brickfields:"Brickfields — All Walkable"};
+        html+=`<div class="stop-group-label">${groupLabels[stop.group]||stop.group}</div>`;
+      }
+      lastGroup=stop.group||null;
+
+      const hasCat=!!stop.cat;
+      const isMeal=stop.meal===true;
+      const catColor=hasCat?CAT_COLORS[stop.cat]:day.color;
+      const matchesSearch=!searchQuery||stop.name.toLowerCase().includes(searchQuery)||stop.desc.toLowerCase().includes(searchQuery)||(stop.tips||'').toLowerCase().includes(searchQuery)||(stop.cat||'').includes(searchQuery);
+      const dimmed=searchQuery&&!matchesSearch;
+      const muted=stop.muted;
+
+      html+=`<div class="stop-item${dimmed?' dimmed':''}${muted?' muted':''}" onclick="openDetail('${day.id}',${si})" role="button" tabindex="0"
+        onkeydown="if(event.key==='Enter')openDetail('${day.id}',${si})">`;
+
+      // Thumb
+      html+=`<div class="stop-thumb" style="background:${catColor}">
+        ${stop.time.replace(/[^0-9:]/g,'').substring(0,5)}
+      </div>`;
+
+      html+=`<div class="stop-info">`;
+      html+=`<div class="stop-time">${ICONS.clock} ${stop.time}</div>`;
+      html+=`<div class="stop-name">${stop.name}</div>`;
+      html+=`<div class="stop-desc">${stop.desc}</div>`;
+
+      // Badges
+      html+=`<div class="stop-badges">`;
+      if(hasCat) html+=`<span class="stop-badge stop-badge-cat" style="background:${catColor}">${stop.cat}</span>`;
+      if(isMeal) html+=`<span class="stop-badge stop-badge-meal">${ICONS.food} Meal</span>`;
+      if(stop.price) html+=`<span class="stop-badge stop-badge-price">${stop.price}</span>`;
+      if(stop.note) html+=`<span class="stop-badge stop-badge-note">${ICONS.warn} ${stop.note}</span>`;
+      html+=`</div>`;
+
+      html+=`</div></div>`;
+    });
+    html+=`</div>`;
+
+    // Summary
+    html+=`<div class="day-col-summary">
+      <div class="day-summary-item">${ICONS.route}<div><div class="day-summary-label">Distance</div><div class="day-summary-value">${day.summary.distance}</div></div></div>
+      <div class="day-summary-item">${ICONS.star}<div><div class="day-summary-label">Highlights</div><div class="day-summary-value">${day.summary.highlights}</div></div></div>
+    </div>`;
+
+    html+=`</div>`;
+  });
+
+  grid.innerHTML=html;
+  grid.dataset.cols=days.length;
+  observeReveal();
+}
+
+/* ====================================================================
+   RENDER NEW SECTIONS
+   ==================================================================== */
+function renderFoodTable(){
+  let html='<thead><tr><th>Meal</th><th>Spot</th><th>What to Order</th><th>Price</th></tr></thead><tbody>';
+  FOOD_REF.forEach(f=>{
+    html+=`<tr><td>${f.day} ${f.meal}</td><td>${f.spot}</td><td>${f.order}</td><td>${f.price}</td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('foodTable').innerHTML=html;
+}
+
+function renderSnacks(){
+  document.getElementById('snacksGrid').innerHTML=BONUS_SNACKS.map(s=>
+    `<div class="snack-card">
+      <div class="snack-icon">${SNACK_ICONS[s.icon]||ICONS.food}</div>
+      <div><div class="snack-name">${s.name}</div><div class="snack-desc">${s.desc}</div></div>
+    </div>`
+  ).join('');
+}
+
+function renderNotes(){
+  document.getElementById('notesGrid').innerHTML=PRACTICAL_NOTES.map(n=>
+    `<div class="note-card">
+      <div class="note-icon">${NOTE_ICONS[n.icon]||ICONS.tip}</div>
+      <div class="note-text">${n.text}</div>
+    </div>`
+  ).join('');
+}
+
+function renderSkipped(){
+  document.getElementById('skippedList').innerHTML=SKIPPED.map(s=>
+    `<div class="skipped-item"><span class="skipped-name">${s.name}</span><span class="skipped-reason">${s.reason}</span></div>`
+  ).join('');
+}
+
+function toggleSkipped(){
+  const list=document.getElementById('skippedList');
+  const chevron=document.getElementById('skippedChevron');
+  list.classList.toggle('open');
+  chevron.style.transform=list.classList.contains('open')?'rotate(180deg)':'';
+}
+
+function renderStats(){
+  const allStops=DAYS.flatMap(d=>d.stops).filter(s=>!s.muted&&s.name!=='Back to hotel');
+  const meals=DAYS.flatMap(d=>d.stops).filter(s=>s.meal===true);
+  document.getElementById('statStops').textContent=allStops.length;
+  document.getElementById('statMeals').textContent=meals.length;
+}
+
+/* ====================================================================
+   DETAIL MODAL
+   ==================================================================== */
+async function openDetail(dayId,stopIdx){
+  const day=DAYS.find(d=>d.id===dayId);
+  if(!day) return;
+  const stop=day.stops[stopIdx];
+  if(!stop) return;
+
+  const hasLoc=stop.lat&&stop.lng;
+  const dist=hasLoc?getDist(HOTEL.lat,HOTEL.lng,stop.lat,stop.lng):null;
+  const hasCat=!!stop.cat;
+  const isMeal=stop.meal===true;
+
+  // Carousel
+  const carousel=document.getElementById('carousel');
+  const dots=document.getElementById('carouselDots');
+  carouselIndex=0;
+
+  if(stop.wiki){
+    carousel.style.display='block';
+    carousel.innerHTML=`<div class="carousel-fallback">Loading...</div>`;
+    dots.style.display='none';
+
+    const cacheKey=`${dayId}-${stopIdx}`;
+    let urls=imgCache[cacheKey];
+    if(!urls){
+      urls=await fetchWikiImages(stop.wiki);
+      imgCache[cacheKey]=urls;
+    }
+    if(urls.length>0){
+      carousel.innerHTML=urls.map((u,i)=>`<img src="${u}" alt="${stop.name}" class="${i===0?'active':''}">`).join('')
+        +(urls.length>1?`<button class="carousel-btn prev" onclick="event.stopPropagation();carouselNav(-1)" aria-label="Previous">&#8249;</button><button class="carousel-btn next" onclick="event.stopPropagation();carouselNav(1)" aria-label="Next">&#8250;</button>`:'');
+      dots.innerHTML=urls.length>1?urls.map((u,i)=>`<button class="carousel-dot ${i===0?'active':''}" onclick="event.stopPropagation();carouselGo(${i})" aria-label="Image ${i+1}"></button>`).join(''):'';
+      dots.style.display=urls.length>1?'flex':'none';
+    }else{
+      carousel.style.display='none';
+      dots.style.display='none';
+    }
+  }else{
+    carousel.style.display='none';
+    dots.style.display='none';
+  }
+
+  // Content
+  let html=`<div class="stop-detail-day" style="color:${day.color}">${day.dayLabel} &middot; ${stop.time}</div>`;
+  html+=`<div class="stop-detail-name">${stop.name}</div>`;
+  html+=`<div class="stop-detail-desc">${stop.desc}</div>`;
+
+  // Badges
+  html+=`<div class="stop-detail-badges">`;
+  if(hasCat) html+=`<span class="stop-detail-badge" style="background:${CAT_COLORS[stop.cat]};color:#fff">${stop.cat}</span>`;
+  if(isMeal) html+=`<span class="stop-detail-badge" style="background:rgba(201,93,78,0.1);color:var(--cat-food)">${ICONS.food} Meal</span>`;
+  if(stop.crowd) html+=`<span class="stop-detail-badge" style="background:var(--surface-alt);color:var(--text-sec)">${CROWD_LABELS[stop.crowd]}</span>`;
+  if(stop.price) html+=`<span class="stop-detail-badge" style="background:var(--surface-alt);color:var(--accent)">${stop.price}</span>`;
+  if(dist!==null) html+=`<span class="stop-detail-dist">${ICONS.distance} ${formatDist(dist)} from hotel</span>`;
+  html+=`</div>`;
+
+  // Note warning
+  if(stop.note){
+    html+=`<div class="stop-detail-tip" style="background:rgba(212,168,83,0.12);border-left-color:#B8960F">${ICONS.warn} ${stop.note}</div>`;
+  }
+
+  // Tips
+  if(stop.tips){
+    html+=`<div class="stop-detail-tip">${ICONS.tip} ${stop.tips}</div>`;
+  }
+
+  // Transport
+  if(stop.transport){
+    html+=`<p style="font-size:0.82rem;color:var(--text-sec);margin-bottom:16px"><strong>Getting there:</strong> ${stop.transport.text}</p>`;
+  }
+
+  // Actions
+  html+=`<div class="stop-detail-actions">`;
+  if(hasLoc) html+=`<a href="${mapsUrl(stop.lat,stop.lng)}" target="_blank" rel="noopener" class="stop-detail-link">${ICONS.pin} Open in Google Maps</a>`;
+  html+=`</div>`;
+
+  document.getElementById('detailContent').innerHTML=html;
+  document.getElementById('detailOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+
+function closeDetail(e){
+  if(e&&e.target!==document.getElementById('detailOverlay')&&!e.target.closest('.stop-detail-close')) return;
+  document.getElementById('detailOverlay').classList.remove('active');
+  document.body.style.overflow='';
+}
+
+function carouselNav(dir){
+  const imgs=document.querySelectorAll('#carousel img');
+  if(!imgs.length) return;
+  imgs[carouselIndex].classList.remove('active');
+  carouselIndex=(carouselIndex+dir+imgs.length)%imgs.length;
+  imgs[carouselIndex].classList.add('active');
+  updateDots();
+}
+function carouselGo(idx){
+  const imgs=document.querySelectorAll('#carousel img');
+  if(!imgs.length) return;
+  imgs[carouselIndex].classList.remove('active');
+  carouselIndex=idx;
+  imgs[carouselIndex].classList.add('active');
+  updateDots();
+}
+function updateDots(){
+  document.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===carouselIndex));
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeDetail();
+  if(document.getElementById('detailOverlay').classList.contains('active')){
+    if(e.key==='ArrowLeft') carouselNav(-1);
+    if(e.key==='ArrowRight') carouselNav(1);
+  }
+});
+
+/* ====================================================================
+   MINI MAPS
+   ==================================================================== */
+function initMiniMaps(){
+  DAYS.forEach(day=>{
+    const el=document.getElementById(`minimap-${day.id}`);
+    if(!el) return;
+    const stops=day.stops.filter(s=>s.lat&&s.lng);
+    if(stops.length===0){el.style.display='none';return}
+
+    const miniMap=L.map(el,{
+      zoomControl:false,attributionControl:false,
+      dragging:false,scrollWheelZoom:false,doubleClickZoom:false,
+      touchZoom:false,boxZoom:false,keyboard:false
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(miniMap);
+
+    const bounds=[];
+    const hotelIcon=L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:#D4A853;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,iconSize:[10,10],iconAnchor:[5,5]});
+    L.marker([HOTEL.lat,HOTEL.lng],{icon:hotelIcon,interactive:false}).addTo(miniMap);
+    bounds.push([HOTEL.lat,HOTEL.lng]);
+
+    stops.forEach(stop=>{
+      bounds.push([stop.lat,stop.lng]);
+      const icon=L.divIcon({className:'',html:`<div style="width:8px;height:8px;background:${day.color};border:1.5px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.25)"></div>`,iconSize:[8,8],iconAnchor:[4,4]});
+      L.marker([stop.lat,stop.lng],{icon:icon,interactive:false}).addTo(miniMap);
+    });
+
+    const routeCoords=stops.map(s=>[s.lat,s.lng]);
+    L.polyline(routeCoords,{color:day.color,weight:2,opacity:0.5,dashArray:'4 6'}).addTo(miniMap);
+
+    if(bounds.length>1) miniMap.fitBounds(bounds,{padding:[15,15]});
+    else miniMap.setView(bounds[0],13);
+  });
+}
+
+/* ====================================================================
+   MAIN MAP
+   ==================================================================== */
+function initMap(){
+  const map=L.map('map',{scrollWheelZoom:false}).setView([3.17,101.70],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18
+  }).addTo(map);
+
+  const hotelIcon=L.divIcon({className:'',html:`<div style="width:14px;height:14px;background:#D4A853;border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+  L.marker([HOTEL.lat,HOTEL.lng],{icon:hotelIcon}).addTo(map).bindPopup(`<div class="popup-name">${HOTEL.name}</div><div class="popup-time">Your base</div>`);
+
+  const bounds=[[HOTEL.lat,HOTEL.lng]];
+
+  DAYS.forEach(day=>{
+    day.stops.forEach(stop=>{
+      if(!stop.lat||!stop.lng) return;
+      bounds.push([stop.lat,stop.lng]);
+      const icon=L.divIcon({className:'',html:`<div style="width:10px;height:10px;background:${day.color};border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>`,iconSize:[10,10],iconAnchor:[5,5]});
+      L.marker([stop.lat,stop.lng],{icon:icon}).addTo(map)
+        .bindPopup(`<div class="popup-name">${stop.name}</div><div class="popup-time">${day.dayLabel} &middot; ${stop.time}</div>${stop.lat?`<a class="popup-link" href="${mapsUrl(stop.lat,stop.lng)}" target="_blank">Google Maps &rarr;</a>`:''}`);
+    });
+  });
+
+  if(bounds.length>1) map.fitBounds(bounds,{padding:[30,30]});
+}
+
+/* ====================================================================
+   INIT
+   ==================================================================== */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderStats();
+  renderDayFilters();
+  renderGrid();
+  renderFoodTable();
+  renderSnacks();
+  renderNotes();
+  renderSkipped();
+  initMiniMaps();
+  initMap();
+  observeReveal();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KL Explorer — April 2-5, 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#x1F1F2;&#x1F1FE;</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAF7F2;--surface:#FFFFFF;--surface-alt:#F3EDE4;
+  --border:#E6DED3;--border-light:#F0EAE0;
+  --text:#1A1714;--text-sec:#6B5E52;--text-tri:#9C8E80;
+  --accent:#C17F59;--accent-light:#D4A07A;--gold:#D4A853;
+  --cat-landmark:#4A6FA5;--cat-cultural:#7E5DAC;--cat-neighborhood:#C17F59;
+  --cat-garden:#3D8B7A;--cat-museum:#5C6BC0;--cat-food:#C95D4E;
+  --cat-cafe:#B8883C;--cat-nightlife:#2D7B88;
+  --radius:16px;--radius-sm:10px;
+  --shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.04);
+  --shadow-hover:0 8px 30px rgba(139,90,43,0.12);
+  --max-w:1360px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+
+/* Grain overlay */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:10000;opacity:0.018;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px}
+
+/* Hero */
+.hero{position:relative;padding:56px 32px 40px;max-width:var(--max-w);margin:0 auto;overflow:hidden}
+.hero::after{content:'KL';position:absolute;right:-24px;top:50%;transform:translateY(-50%);
+  font-family:'Cormorant Garamond',serif;font-size:18rem;font-weight:700;
+  color:rgba(193,127,89,0.04);pointer-events:none;line-height:1}
+.hero-eyebrow{display:inline-block;font-size:0.7rem;font-weight:600;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:20px;position:relative;padding-bottom:16px}
+.hero-eyebrow::after{content:'';position:absolute;bottom:0;left:0;width:36px;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:1px}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:4.2rem;font-weight:700;
+  letter-spacing:-0.03em;line-height:1.05;color:var(--text);margin-bottom:12px}
+.hero-subtitle{font-size:1.05rem;color:var(--text-sec);font-weight:300;max-width:500px;margin-bottom:28px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.meta-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:100px;
+  font-size:0.78rem;color:var(--text-sec);font-weight:400}
+.hero-stats{display:flex;gap:32px;padding-top:24px;border-top:1px solid var(--border)}
+.stat{text-align:center}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-label{font-size:0.65rem;color:var(--text-tri);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:2px}
+
+/* Controls */
+.controls{position:sticky;top:0;z-index:100;
+  background:rgba(250,247,242,0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-light);padding:14px 0}
+.controls-inner{max-width:var(--max-w);margin:0 auto;padding:0 32px;display:flex;flex-direction:column;gap:10px}
+.filters-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.filters-row::-webkit-scrollbar{display:none}
+.pill{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:100px;
+  font-size:0.78rem;font-weight:500;border:1px solid var(--border);background:var(--surface);
+  color:var(--text-sec);cursor:pointer;white-space:nowrap;transition:all 0.25s;font-family:inherit}
+.pill:hover{border-color:var(--accent);color:var(--text)}
+.pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:180px;position:relative}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tri);pointer-events:none}
+.search{width:100%;padding:8px 14px 8px 36px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font-size:0.82rem;font-family:inherit;outline:none;transition:border-color 0.2s}
+.search:focus{border-color:var(--accent)}
+.search::placeholder{color:var(--text-tri)}
+.crowd-filters{display:flex;gap:5px}
+.crowd-pill{padding:5px 12px;border-radius:100px;font-size:0.72rem;font-weight:500;
+  border:1px solid var(--border);background:transparent;color:var(--text-sec);
+  cursor:pointer;transition:all 0.2s;font-family:inherit}
+.crowd-pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.view-toggle{display:flex;background:var(--surface-alt);border-radius:var(--radius-sm);padding:3px;gap:2px}
+.view-btn{padding:6px 14px;border-radius:8px;border:none;background:transparent;
+  color:var(--text-sec);font-size:0.78rem;font-weight:500;cursor:pointer;
+  transition:all 0.2s;font-family:inherit}
+.view-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+
+/* Grid */
+.main{max-width:var(--max-w);margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;padding:28px 32px}
+.card{background:var(--surface);border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(24px);
+  transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.22,1,0.36,1),box-shadow 0.35s ease}
+.card.revealed{opacity:1;transform:translateY(0)}
+.card.revealed:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover)}
+.card-img-wrap{position:relative;width:100%;aspect-ratio:16/10;background:var(--surface-alt);overflow:hidden}
+.card-img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.5s ease,transform 0.4s ease}
+.card-img.loaded{opacity:1}
+.card.revealed:hover .card-img.loaded{transform:scale(1.03)}
+.card-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:0.25}
+.shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.02),transparent);animation:shimmer 1.8s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.card-badges{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
+.cat-badge{padding:4px 12px;border-radius:100px;font-size:0.65rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.04em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cat-badge-light{background:rgba(255,255,255,0.88);color:var(--text)}
+.crowd-badge{padding:4px 10px;border-radius:100px;font-size:0.65rem;font-weight:600;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(255,255,255,0.88)}
+.card-body{padding:16px 18px 18px}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;
+  letter-spacing:-0.01em;margin-bottom:4px;line-height:1.2}
+.card-tag{font-size:0.8rem;color:var(--text-sec);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light)}
+.card-dist{font-size:0.72rem;color:var(--text-tri);font-weight:400;display:flex;align-items:center;gap:4px}
+.card-price{font-size:0.73rem;color:var(--accent);font-weight:600}
+.card-action{font-size:0.73rem;color:var(--text-tri);font-weight:500;display:flex;align-items:center;gap:4px;transition:color 0.2s}
+.card:hover .card-action{color:var(--accent)}
+
+/* Map */
+#map-container{display:none;height:calc(100vh - 130px);margin:0 32px 24px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+#map{height:100%;width:100%;background:var(--surface-alt)}
+.leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
+.leaflet-popup-tip{background:var(--surface)}
+.leaflet-popup-content{margin:12px 16px;font-family:'Outfit',system-ui,sans-serif;font-size:0.82rem}
+.popup-name{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.popup-tag{color:var(--text-sec);font-size:0.78rem}
+.popup-link{display:inline-block;margin-top:8px;font-size:0.75rem;color:var(--accent);font-weight:500}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,23,20,0.45);z-index:200;display:none;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:20px;max-width:640px;width:100%;max-height:90vh;
+  overflow-y:auto;animation:modalIn 0.35s cubic-bezier(0.22,1,0.36,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-header{position:sticky;top:0;z-index:10;display:flex;justify-content:flex-end;padding:14px 18px 0}
+.modal-close{width:36px;height:36px;border-radius:50%;border:none;background:var(--surface-alt);
+  color:var(--text-sec);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;
+  justify-content:center;transition:all 0.2s;font-family:inherit}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.carousel{position:relative;width:100%;aspect-ratio:16/10;background:var(--surface-alt);overflow:hidden}
+.carousel img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity 0.45s ease}
+.carousel img.active{opacity:1}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;
+  border-radius:50%;border:none;background:rgba(255,255,255,0.85);color:var(--text);
+  cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:2;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.carousel-btn:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.carousel-btn.prev{left:12px}
+.carousel-btn.next{right:12px}
+.carousel-dots{display:flex;justify-content:center;gap:6px;padding:12px 0}
+.carousel-dot{width:7px;height:7px;border-radius:50%;background:var(--border);border:none;cursor:pointer;transition:all 0.2s}
+.carousel-dot.active{background:var(--accent);transform:scale(1.2)}
+.modal-body{padding:0 24px 28px}
+.modal-name{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;
+  letter-spacing:-0.02em;margin-bottom:6px;line-height:1.15}
+.modal-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.modal-desc{font-size:0.88rem;color:var(--text-sec);line-height:1.7;margin-bottom:20px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.info-card{background:var(--surface-alt);border-radius:12px;padding:14px}
+.info-label{font-size:0.65rem;color:var(--text-tri);text-transform:uppercase;letter-spacing:0.06em;
+  font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.info-value{font-size:0.82rem;font-weight:400;line-height:1.5;color:var(--text)}
+.maps-btn{display:block;width:100%;padding:13px;border-radius:12px;border:none;
+  background:var(--text);color:var(--bg);font-weight:600;font-size:0.88rem;
+  cursor:pointer;font-family:inherit;transition:all 0.2s;text-align:center}
+.maps-btn:hover{opacity:0.88}
+
+/* Empty */
+.empty{text-align:center;padding:80px 20px;color:var(--text-tri)}.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:0.4}
+.empty-text{font-size:0.95rem}
+
+/* Footer */
+.footer{max-width:var(--max-w);margin:0 auto;padding:40px 32px 48px;text-align:center;border-top:1px solid var(--border-light)}
+.footer p{font-size:0.8rem;color:var(--text-tri);font-weight:400}
+.footer-sub{margin-top:4px;font-size:0.7rem;color:var(--border)}
+
+/* Animations */
+.hero{animation:fadeUp 0.7s ease both}
+.controls{animation:fadeUp 0.6s ease 0.15s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Responsive */
+@media(max-width:768px){
+  .hero{padding:40px 20px 28px}
+  .hero-title{font-size:2.8rem}
+  .hero::after{font-size:10rem;right:-12px}
+  .hero-stats{gap:20px}
+  .controls-inner{padding:0 20px}
+  .grid{grid-template-columns:1fr;padding:16px 20px;gap:18px}
+  .modal{max-height:95vh;border-radius:16px 16px 0 0;margin-top:auto;align-self:flex-end}
+  .info-grid{grid-template-columns:1fr}
+  #map-container{margin:0 20px 20px;height:70vh}
+  .footer{padding:32px 20px 40px}
+}
+@media(max-width:480px){
+  .hero-title{font-size:2.2rem}
+  .hero-stats{flex-wrap:wrap;gap:16px}
+  .controls-row{flex-direction:column;align-items:stretch}
+  .crowd-filters{justify-content:center}
+  .view-toggle{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">Travel Guide &middot; April 2026</span>
+    <h1 class="hero-title">KL Explorer</h1>
+    <p class="hero-subtitle">Your curated guide to 48 handpicked places across Kuala Lumpur</p>
+    <div class="hero-meta">
+      <span class="meta-chip">&#9992;&#65039; Apr 2 (DMK&#8594;KUL 1:20pm) &mdash; Apr 5 (KUL&#8594;DMK 7:40pm)</span>
+      <span class="meta-chip">&#127976; Novotel KL City Centre</span>
+      <span class="meta-chip">&#128197; 3 full days</span>
+    </div>
+    <div class="hero-stats" id="stats"></div>
+  </div>
+</header>
+
+<nav class="controls">
+  <div class="controls-inner">
+    <div class="filters-row" id="catFilters"></div>
+    <div class="controls-row">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search" id="search" type="text" placeholder="Search places, food, vibes...">
+      </div>
+      <div class="crowd-filters">
+        <button class="crowd-pill active" data-crowd="0" onclick="filterCrowd(0)">All</button>
+        <button class="crowd-pill" data-crowd="1" onclick="filterCrowd(1)">Quiet</button>
+        <button class="crowd-pill" data-crowd="2" onclick="filterCrowd(2)">Low</button>
+        <button class="crowd-pill" data-crowd="3" onclick="filterCrowd(3)">Med</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')">Grid</button>
+        <button class="view-btn" id="mapBtn" onclick="setView('map')">Map</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="grid" id="grid"></div>
+  <div id="map-container"><div id="map"></div></div>
+</main>
+
+<footer class="footer">
+  <p>Built for your KL adventure &middot; April 2026</p>
+  <p class="footer-sub">Images via Wikimedia Commons &middot; Maps by OpenStreetMap &amp; CARTO</p>
+</footer>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header"><button class="modal-close" onclick="closeModal()">&#10005;</button></div>
+    <div class="carousel" id="carousel"></div>
+    <div class="carousel-dots" id="carouselDots"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const CAT_META = {
+  landmark:{label:"Landmark",color:"#4A6FA5",icon:"&#127963;"},
+  cultural:{label:"Cultural",color:"#7E5DAC",icon:"&#128332;"},
+  neighborhood:{label:"Neighborhood",color:"#C17F59",icon:"&#127961;"},
+  garden:{label:"Garden",color:"#3D8B7A",icon:"&#127793;"},
+  museum:{label:"Museum",color:"#5C6BC0",icon:"&#127963;"},
+  food:{label:"Food",color:"#C95D4E",icon:"&#127836;"},
+  cafe:{label:"Cafe",color:"#B8883C",icon:"&#9749;"},
+  nightlife:{label:"Night Life",color:"#2D7B88",icon:"&#127769;"}
+};
+const CROWD_LABELS = {1:"Very Low",2:"Low",3:"Medium",4:"High"};
+const CROWD_COLORS = {1:"#3D8B7A",2:"#6BA583",3:"#C9A84E",4:"#C95D4E"};
+const IMG_FALLBACKS = {
+  landmark:"linear-gradient(145deg,#dfe6f0,#c8d4e4)",cultural:"linear-gradient(145deg,#e5ddf0,#d3c7e4)",
+  neighborhood:"linear-gradient(145deg,#f0e5dd,#e4d3c7)",garden:"linear-gradient(145deg,#ddf0ea,#c7e4d8)",
+  museum:"linear-gradient(145deg,#e0e3f0,#cdd2e4)",food:"linear-gradient(145deg,#f0ddda,#e4c7c2)",
+  cafe:"linear-gradient(145deg,#efe8d8,#e2d6bc)",nightlife:"linear-gradient(145deg,#ddeaee,#c7dae0)"
+};
+const CAT_EMOJIS = {landmark:"&#127963;",cultural:"&#128332;",neighborhood:"&#127961;",garden:"&#127793;",museum:"&#127963;",food:"&#127836;",cafe:"&#9749;",nightlife:"&#127769;"};
+const HOTEL_LAT=3.1555,HOTEL_LNG=101.7140;
+
+const places = [
+  {name:"Petronas Twin Towers",cat:"landmark",crowd:3,lat:3.1578,lng:101.7117,
+   tag:"Iconic 452m twin towers — skybridge & observation deck with city panorama",
+   desc:"The defining image of KL. The observation deck on the 86th floor offers stunning 360° views, and the skybridge connecting the two towers at level 41 is an engineering marvel. KLCC Park at the base has a lake, jogging paths, and a fountain show every evening at 8pm and 9pm. The Suria KLCC mall below is a standard luxury mall you can skip.",
+   best:"Weekday morning (book ahead). Fountain show 8pm & 9pm nightly",
+   access:"10 min walk from hotel. KLCC LRT station directly below",
+   tips:"Book observation deck tickets online well in advance. First slot of the day is least crowded. Skip the mall.",
+   wiki:"Petronas Towers Kuala Lumpur",price:"RM80 obs deck"},
+
+  {name:"Batu Caves",cat:"landmark",crowd:4,lat:3.2379,lng:101.6840,
+   tag:"Massive limestone cave temples with 272 rainbow-painted steps",
+   desc:"A 400-million-year-old limestone hill with Hindu temples inside cathedral-sized caves. The 272 steps are painted in vivid rainbow colors. The main Cathedral Cave is genuinely impressive — a massive cavern with natural light streaming through holes in the ceiling. Watch out for aggressive macaque monkeys on the stairs.",
+   best:"Before 8am on a weekday — the only way to avoid crushing crowds",
+   access:"KTM Komuter train to Batu Caves station (30 min from KL Sentral). Or Grab (25 min from KLCC)",
+   tips:"Go at dawn. Wear comfortable shoes. Keep food hidden from monkeys. Modest clothing required in temple areas.",
+   wiki:"Batu Caves",price:"Free (Dark Cave tour RM35)"},
+
+  {name:"KL Tower (Menara KL)",cat:"landmark",crowd:3,lat:3.1526,lng:101.7037,
+   tag:"421m tower with observation deck, glass sky box, and revolving restaurant",
+   desc:"KL's telecommunications tower offers arguably better views than the Petronas observation deck — because you can see the Petronas Towers FROM here. The observation deck sits at 276m, while the Sky Deck at 300m is open-air. The glass Sky Box lets you stand on a transparent floor. A revolving restaurant at the top serves dinner with 360° views.",
+   best:"Late afternoon for sunset views. Weekdays less crowded than Petronas",
+   access:"Walk from Bukit Nanas Monorail (5 min) or 20 min walk from hotel through KL Forest Eco Park",
+   tips:"Less crowded and cheaper than Petronas observation deck. Sky Box is the highlight. Combine with KL Forest Eco Park for a nature+city combo.",
+   wiki:"Kuala Lumpur Tower",price:"RM52 obs / RM105 sky deck"},
+
+  {name:"Merdeka Square",cat:"landmark",crowd:3,lat:3.1488,lng:101.6933,
+   tag:"Where Malaysia declared independence — surrounded by colonial-era landmarks",
+   desc:"The birthplace of Malaysian independence (Aug 31, 1957). A large open field surrounded by stunning colonial buildings including the Sultan Abdul Samad Building, Royal Selangor Club, and St Mary's Cathedral. The Warisan KL heritage initiative (RM600 million) is actively restoring eight heritage sites in this cluster for Visit Malaysia 2026.",
+   best:"Early morning for photography. Self-guided heritage trail takes 2-3 hours",
+   access:"Walk from Masjid Jamek LRT (5 min). Or 25 min walk from hotel",
+   tips:"Start a heritage walking trail here. Combine with Masjid Jamek, River of Life, Chinatown. The square itself rarely feels crowded despite being central.",
+   wiki:"Dataran Merdeka",price:"Free"},
+
+  {name:"Saloma Link Bridge",cat:"landmark",crowd:2,lat:3.1593,lng:101.7095,
+   tag:"LED-lit pedestrian bridge connecting Kampung Baru to KLCC — stunning at night",
+   desc:"A 69-meter elevated pedestrian bridge with a dramatic curved steel canopy that lights up in changing LED colors after dark. Connects the modern KLCC district to the traditional Kampung Baru village. Great for night photography with the Petronas Towers as backdrop. Named after the legendary Malaysian singer and actress Saloma.",
+   best:"After sunset for the LED light show. Best photography spot in KL at night",
+   access:"10 min walk from hotel / KLCC. One end at Lorong Raja Muda",
+   tips:"Walk across at night, then explore Kampung Baru for satay. Connects two completely different worlds — modern and traditional KL.",
+   wiki:"Saloma Link",price:"Free"},
+
+  {name:"The Exchange TRX",cat:"landmark",crowd:3,lat:3.1417,lng:101.7188,
+   tag:"KL's newest landmark — 492m tower with a massive rooftop park",
+   desc:"Opened in 2023, this is KL's latest mega-development featuring the 492m Exchange 106 tower (Malaysia's tallest building) and a 10-acre rooftop park with gardens, water features, and city views. The retail area below has shops and restaurants. Still very new and represents KL's future ambitions.",
+   best:"Late afternoon for the rooftop park. Weekdays are emptier",
+   access:"TRX MRT station (direct). Or 15 min Grab from hotel",
+   tips:"The rooftop park is free and worth visiting for the scale and views. Good modern contrast to the heritage sites.",
+   wiki:"Exchange 106",price:"Free (rooftop park)"},
+
+  {name:"National Palace (Istana Negara)",cat:"landmark",crowd:2,lat:3.1574,lng:101.6758,
+   tag:"Official residence of Malaysia's King — impressive golden-domed exterior",
+   desc:"The official royal residence of the Yang di-Pertuan Agong (Malaysia's King). You can only view the exterior — the ornate golden-domed gates and the palace beyond are impressive photo opportunities. A large equestrian statue marks the entrance. The building is relatively new (2011) and replaced the old Istana Negara which is now a museum.",
+   best:"Morning for photography (sun faces the entrance). Quick stop — 20-30 min",
+   access:"Grab/taxi from KLCC (15 min). No nearby public transit",
+   tips:"Exterior only. Good for a quick photo stop, not a destination on its own. Combine with nearby Perdana Botanical Gardens.",
+   wiki:"Istana Negara Malaysia",price:"Free (exterior)"},
+
+  {name:"Masjid Jamek & River of Life",cat:"cultural",crowd:2,lat:3.1490,lng:101.6960,
+   tag:"KL's oldest mosque (1909) at the city's founding point — nightly blue river light show",
+   desc:"KL's oldest mosque, designed in Indo-Saracenic style, sitting at the exact confluence of the Klang and Gombak rivers — the spot where KL was founded. Recently restored under the River of Life project with beautiful landscaping, fountains, and a nightly blue LED light show that turns the river cobalt blue. Surprisingly uncrowded for what it is.",
+   best:"Late afternoon to see it in daylight, then stay for the blue river lights after sunset",
+   access:"Masjid Jamek LRT station — literally 2 min walk",
+   tips:"Free modest clothing provided on-site. Closed during prayer times. Come for sunset and stay for the light show.",
+   wiki:"Jamek Mosque",price:"Free"},
+
+  {name:"Masjid Negara (National Mosque)",cat:"cultural",crowd:2,lat:3.1417,lng:101.6919,
+   tag:"Malaysia's national mosque — striking 1960s modernist architecture with star-shaped roof",
+   desc:"Surprisingly uncrowded for a national monument. The 1965 modernist design features a distinctive 73m minaret and a 16-pointed star roof representing the 13 states of Malaysia and the 5 pillars of Islam. The interior is vast and serene. Free robes provided for visitors. Combine with the Islamic Arts Museum right next door.",
+   best:"Weekday mornings outside prayer times. Avoid Friday Jumu'ah prayers",
+   access:"Walk from Kuala Lumpur station (10 min). Or Grab from KLCC (10 min)",
+   tips:"Combine with Islamic Arts Museum (adjacent) and Perdana Botanical Gardens (5 min walk). One of KL's most worthwhile free visits.",
+   wiki:"National Mosque of Malaysia",price:"Free"},
+
+  {name:"Masjid Wilayah",cat:"cultural",crowd:1,lat:3.1750,lng:101.6870,
+   tag:"Stunning Ottoman-Malay fusion dome — one of KL's most beautiful and least-visited mosques",
+   desc:"A gorgeous mosque blending Ottoman and Malay architectural styles with a massive blue dome. Modeled partly on Istanbul's Blue Mosque. Despite being one of KL's most architecturally impressive religious buildings, very few tourists visit. The interior is equally stunning with intricate calligraphy and tilework.",
+   best:"Weekday mornings outside prayer times",
+   access:"Grab/taxi to Jalan Duta (15 min from KLCC)",
+   tips:"Photography lovers — this is your spot. The dome and minarets are incredibly photogenic. Combine with a trip to Taman Tugu nearby.",
+   wiki:"Federal Territory Mosque",price:"Free"},
+
+  {name:"Sin Sze Si Ya Temple",cat:"cultural",crowd:1,lat:3.1453,lng:101.6972,
+   tag:"KL's oldest Taoist temple (1864) — hidden in plain sight in Chinatown",
+   desc:"Built by KL's founder Yap Ah Loy in 1864, this is the city's oldest Chinese temple. Beautiful wood carvings, deity statues, and a dimly lit atmospheric interior. Most tourists walk right past it on their way through Chinatown without noticing the narrow entrance.",
+   best:"Weekday mornings for quiet contemplation",
+   access:"Walk from Pasar Seni LRT/MRT (5 min). Off Jalan Tun H.S. Lee in Chinatown",
+   tips:"Easy to miss — look for the narrow entrance. Part of the Chinatown heritage walk.",
+   wiki:"Sin Sze Si Ya Temple",price:"Free"},
+
+  {name:"Sri Mahamariamman Temple",cat:"cultural",crowd:3,lat:3.1448,lng:101.6966,
+   tag:"KL's oldest Hindu temple (1873) — ornate gopuram with 228 deity figures",
+   desc:"The oldest Hindu temple in KL, built in 1873. The entrance tower (gopuram) is covered with 228 colorful figures of Hindu deities — a riot of sacred sculpture. Inside is equally ornate with Spanish and Italian tiles and precious stones. Located at the edge of Chinatown, it's the spiritual center for KL's Hindu community.",
+   best:"Early morning for fewer visitors. Remove shoes before entering",
+   access:"Walk from Pasar Seni LRT (5 min). On Jalan Tun H.S. Lee in Chinatown",
+   tips:"No photography inside (usually). The gopuram alone is worth the visit. 2 min walk from Sin Sze Si Ya Temple — do both together.",
+   wiki:"Sri Mahamariamman Temple Kuala Lumpur",price:"Free"},
+
+  {name:"Thean Hou Temple",cat:"cultural",crowd:3,lat:3.1253,lng:101.6862,
+   tag:"Six-tiered Chinese temple — one of SE Asia's largest, with panoramic city views",
+   desc:"A massive six-tiered Chinese temple blending modern and traditional architecture. Dedicated to Tian Hou, the goddess of the sea. The rooftop terraces offer panoramic views of the KL skyline. More popular with locals than tourists. Can get busy on weekends and Chinese holidays but is manageable on weekdays.",
+   best:"Weekday mornings. Avoid Chinese New Year and Mooncake Festival",
+   access:"Grab/taxi from KLCC (15 min). On Robson Heights, off Jalan Syed Putra",
+   tips:"The city views from the upper levels are excellent. Combine with nearby Brickfields (Little India) for a temple-hopping half-day.",
+   wiki:"Thean Hou Temple",price:"Free"},
+
+  {name:"Sultan Abdul Samad Building",cat:"cultural",crowd:3,lat:3.1488,lng:101.6945,
+   tag:"Moorish-arch colonial icon (1897) — where independence was declared. Just reopened Feb 2026",
+   desc:"KL's most iconic colonial building with its distinctive Moorish arches and clock tower. This is where Malaysian independence was proclaimed in 1957. Just reopened in February 2026 after a major restoration under the Warisan KL initiative. Now houses cafes, galleries, and a nonya kebaya boutique tracing KL's evolution from tin mining to independence.",
+   best:"Weekday mornings. Combine with the heritage walking trail around Merdeka Square",
+   access:"Walk from Masjid Jamek LRT (5 min). Faces Merdeka Square",
+   tips:"Newly reopened — may be busier initially. The interior is now publicly accessible for the first time in decades.",
+   wiki:"Sultan Abdul Samad Building",price:"Free"},
+
+  {name:"Loke Mansion",cat:"cultural",crowd:1,lat:3.1543,lng:101.6960,
+   tag:"Ornate 1892 mansion of Malaya's richest man — now hosts pop-up art galleries",
+   desc:"An ornate whitewashed mansion built in 1892 for Loke Yew, once the wealthiest man in British Malaya. Said to be one of the first buildings in the Federated Malay States to have electricity. Now used for pop-up art galleries and cultural events. The architecture alone is worth seeing.",
+   best:"Check for events. Exterior viewable anytime",
+   access:"Walk from Masjid Jamek LRT (10 min). On Jalan Medan Tuanku",
+   tips:"Not always open inside — check event listings. Beautiful exterior regardless.",
+   wiki:"Loke Mansion Kuala Lumpur",price:"Free"},
+
+  {name:"Kampung Baru",cat:"neighborhood",crowd:1,lat:3.1612,lng:101.7010,
+   tag:"1899 Malay village surviving in central KL — stilt houses, night market, satay smoke",
+   desc:"A traditional Malay village established in 1899 that somehow survived right in the centre of modern KL. Wooden stilt houses, narrow lanes, coconut trees, and a tempo that feels like rural Malaysia. The Saturday night market (pasar malam) and weekend flea market (pasar karat) are cultural experiences. Tourists rarely come here.",
+   best:"Saturday 6pm for the night market. Weekday mornings for quiet wandering",
+   access:"Walk from KLCC (15 min via Saloma Link). Kampung Baru LRT station",
+   tips:"Cross Saloma Link from KLCC at night for the full experience. Try satay at Satay Zulkifli and nasi lemak at Wanjo.",
+   wiki:"Kampung Baru Kuala Lumpur",price:"Free"},
+
+  {name:"Chinatown (Petaling Street)",cat:"neighborhood",crowd:4,lat:3.1440,lng:101.6965,
+   tag:"KL's historic Chinese quarter — go beyond the main drag into the heritage back lanes",
+   desc:"The obvious Chinatown with its famous Petaling Street market. The main drag (Jalan Petaling) is crowded and touristy, BUT the surrounding back lanes are where the magic is. Jalan Sultan hides contemporary restaurants behind pre-war heritage facades. Side alleys lead to hidden cafes, temples, and art spaces. Skip the market, explore the lanes.",
+   best:"Early morning (before 9am) for quiet streets. Late evening for atmospheric back-lane dining",
+   access:"Pasar Seni MRT/LRT station. Or 25 min walk from hotel",
+   tips:"The market itself is skippable. The real Chinatown is in the lanes around it — Kwai Chai Hong, Merchant's Lane, Chocha Foodstore, Sin Sze Si Ya Temple.",
+   wiki:"Chinatown Kuala Lumpur",price:"Free"},
+
+  {name:"Kwai Chai Hong",cat:"neighborhood",crowd:3,lat:3.1443,lng:101.6973,
+   tag:"Restored 'Little Demon Alley' — 1960s murals with interactive QR audio stories",
+   desc:"A beautifully restored pre-war alleyway in Chinatown with detailed murals depicting 1960s daily life. QR codes on each mural provide interactive audio stories. The name means 'Little Demon Alley' — a reference to the mischievous children who once lived here. Connected to excellent hidden restaurants and bars.",
+   best:"Weekday late afternoon for photos. Evenings for dining and atmosphere",
+   access:"5 min walk from Pasar Seni MRT. Near Jalan Petaling",
+   tips:"Scan the QR codes for the audio stories — they add genuine depth. Great photo spot for portraits.",
+   wiki:"Kwai Chai Hong",price:"Free"},
+
+  {name:"Chow Kit",cat:"neighborhood",crowd:3,lat:3.1650,lng:101.6980,
+   tag:"KL's largest wet market — raw, multilingual, zero tourists, pure local energy",
+   desc:"Named after tin tycoon Loke Chow Kit. Home to KL's largest wet market — a sprawling, raw, multilingual sensory experience with fresh herbs, spices, prepared curries, and tropical fruits. Characterful streets with generations-old residents. This is KL's most unpolished, authentic neighborhood. Zero tourist presence.",
+   best:"Before 8am daily (market runs 6am-2pm) when it's coolest and most active",
+   access:"Chow Kit Monorail station. Or 15 min Grab from KLCC",
+   tips:"Come for the market experience, stay for Mohd Yaseen Nasi Kandar and the surrounding food stalls. Bring your camera.",
+   wiki:"Chow Kit Kuala Lumpur",price:"Free"},
+
+  {name:"Brickfields (Little India)",cat:"neighborhood",crowd:2,lat:3.1320,lng:101.6870,
+   tag:"KL's Indian quarter — temples, banana leaf rice, jasmine incense, flower garlands",
+   desc:"KL's vibrant Indian quarter. Hindu temples with ornate gopurams, banana leaf rice restaurants, sari shops, flower garland stalls, and the constant smell of jasmine and incense. Multiple temples of different traditions within walking distance of each other. The banana leaf rice here is legendary.",
+   best:"Morning for temple visits. 11:30am for banana leaf rice (arrive before lunch rush)",
+   access:"Walk from KL Sentral — KL's main transit hub. Or 10 min Grab from KLCC",
+   tips:"Start with temples, end with banana leaf rice at Lawanya or Vishal. The whole strip along Jalan Tun Sambanthan is walkable.",
+   wiki:"Brickfields Kuala Lumpur",price:"Free"},
+
+  {name:"Zhongshan Building",cat:"neighborhood",crowd:1,lat:3.1380,lng:101.6920,
+   tag:"1950s building turned indie arts hub — galleries, vinyl records, bakery, cafes",
+   desc:"A restored 1950s whitewashed building that once housed the Selangor Zhongshan Association. Now the creative heart of KL's independent scene — housing art galleries (OUR ArtProjects), a vinyl record store (Tandang Records), an artisan bakery (Tommy le Baker), indie bookstores, and cafes including tiny Piu Piu Piu espresso bar.",
+   best:"Weekday afternoons. Check @thezhongshanbuilding on Instagram for events",
+   access:"Grab/taxi from KLCC (10 min). End of Jalan Rotan, Kampung Attap",
+   tips:"A great place to spend a slow afternoon browsing art, records, and coffee. The creative community here is genuine, not performative.",
+   wiki:"Zhongshan Building Kuala Lumpur",price:"Free"},
+
+  {name:"KLCC Park",cat:"garden",crowd:3,lat:3.1560,lng:101.7130,
+   tag:"Lush park at the base of the Petronas Towers — lake, jogging paths, nightly fountain show",
+   desc:"A beautifully landscaped 50-acre park right at the base of the Petronas Towers. Features a man-made lake, jogging paths, a children's playground, and a wading pool. The highlight is the Lake Symphony fountain show — choreographed water jets with lights and music every evening. A pleasant oasis of green in the KLCC district.",
+   best:"Evenings for the fountain show (8pm & 9pm). Early mornings for quiet walks",
+   access:"Walk from hotel (10 min). Directly accessible from KLCC LRT and Suria KLCC mall",
+   tips:"The fountain show is free and genuinely enjoyable. Good spot for an evening stroll after dinner.",
+   wiki:"KLCC Park",price:"Free"},
+
+  {name:"Taman Tugu",cat:"garden",crowd:1,lat:3.1495,lng:101.6870,
+   tag:"Urban forest with 3km trails through preserved jungle — few visitors, free entry",
+   desc:"A relatively new urban forest park with 3km of forest trails and a 1km nursery trail through preserved jungle. Trees are well-tagged for identification. Feels like a proper nature retreat despite being in the middle of the city. Very few visitors — one of KL's best-kept secrets.",
+   best:"Early morning (7:30am) when it's coolest and quietest. Open daily until 6:30pm",
+   access:"Grab/taxi from KLCC (10 min). Near Tugu Negara (National Monument)",
+   tips:"Combine with Perdana Botanical Gardens and the National Monument — all within walking distance.",
+   wiki:"Taman Tugu",price:"Free"},
+
+  {name:"KL Forest Eco Park (Bukit Nanas)",cat:"garden",crowd:2,lat:3.1528,lng:101.7018,
+   tag:"Primary rainforest wedged between skyscrapers — canopy walk with KL Tower views",
+   desc:"A remarkable 9.3-hectare patch of primary rainforest squeezed between modern skyscrapers. The temperature drops noticeably the moment you step in. Features a canopy walkway, several trails, and views of KL Tower rising above the canopy. Free entry makes it a no-brainer addition to any KL day.",
+   best:"7-9am for bird sounds and cool air. Open daily 7am-6pm",
+   access:"Walk from Bukit Nanas Monorail (5 min). Or walk from KL Tower",
+   tips:"Combine with KL Tower for a nature-then-views combo. The canopy walkway is a brief but fun experience.",
+   wiki:"Bukit Nanas Forest Reserve",price:"Free"},
+
+  {name:"Perdana Botanical Gardens",cat:"garden",crowd:2,lat:3.1435,lng:101.6871,
+   tag:"KL's premier green space — 800-variety Orchid Garden, rare fruit trees, peaceful paths",
+   desc:"KL's oldest and most beautiful park. The Orchid Garden alone is worth the visit — 800 varieties across 10,000 sqm. Also features a Hibiscus Garden, rare fruit trees, fountains, and well-maintained walking paths. Clean, peaceful, and genuinely beautiful on weekdays.",
+   best:"Weekday mornings. The Orchid Garden is the highlight",
+   access:"Walk from KL Sentral (15 min) or Grab from KLCC (10 min). Adjacent to Islamic Arts Museum and Masjid Negara",
+   tips:"Perfect half-day combo: Masjid Negara → Islamic Arts Museum → Perdana Gardens → Taman Tugu",
+   wiki:"Perdana Botanical Gardens",price:"Free (Orchid Garden RM1)"},
+
+  {name:"FRIM Canopy Walk",cat:"garden",crowd:2,lat:3.2367,lng:101.6328,
+   tag:"150m walkway suspended 30m above rainforest canopy — daily visitor cap keeps it uncrowded",
+   desc:"A 486-hectare forest research campus with a famous 150m canopy walkway suspended 30 meters above the forest floor. The daily cap of 250 visitors means it never gets too crowded. Multiple hiking trails through mature rainforest make this feel like a proper jungle experience close to the city.",
+   best:"Arrive at 9:30am opening on a weekday. Walkway closes at 2:30pm (last entry 1:30pm)",
+   access:"Grab/taxi to Kepong (30 min from KLCC). Near Batu Caves — can combine",
+   tips:"Closed during/after heavy rain. Bring water and insect repellent. Can combine with Batu Caves (nearby). Wear proper shoes.",
+   wiki:"Forest Research Institute Malaysia canopy",price:"RM10 (foreigners)"},
+
+  {name:"Titiwangsa Lake Gardens",cat:"garden",crowd:2,lat:3.1765,lng:101.7068,
+   tag:"Petronas Towers reflected in a lake — KL's most iconic photography spot",
+   desc:"A 46-hectare park with a large lake surrounded by jogging tracks. The main draw is the view — the Petronas Twin Towers reflected in the lake water at golden hour is KL's most photographed scene. Popular with local joggers but rarely visited by tourists.",
+   best:"Early morning or late afternoon for golden hour reflections",
+   access:"Titiwangsa LRT/Monorail station. Or 10 min Grab from KLCC",
+   tips:"Bring a camera. Late afternoon light reflecting the towers in the lake is spectacular. Good for a morning jog.",
+   wiki:"Titiwangsa Lake Gardens",price:"Free"},
+
+  {name:"KL Bird Park",cat:"garden",crowd:3,lat:3.1430,lng:101.6863,
+   tag:"World's largest free-flight walk-in aviary — 3000+ birds roaming freely around you",
+   desc:"The world's largest free-flight walk-in aviary, covering 20.9 acres under a giant mesh canopy. Over 3,000 birds from 200 species roam freely — you walk among them on elevated paths through lush tropical landscaping. Hornbills, peacocks, flamingos, and colorful parrots are everywhere. More impressive than expected.",
+   best:"Weekday mornings when birds are most active and crowds are minimal",
+   access:"Walk from Perdana Botanical Gardens (5 min). Or Grab from KLCC (12 min)",
+   tips:"Allow 1.5-2 hours. Feeding sessions are interactive. Combine with Perdana Gardens and Butterfly Park.",
+   wiki:"Kuala Lumpur Bird Park",price:"RM63 adults"},
+
+  {name:"Islamic Arts Museum Malaysia",cat:"museum",crowd:2,lat:3.1420,lng:101.6908,
+   tag:"SE Asia's largest Islamic arts museum — 7,000+ artifacts, stunning architecture, world-class",
+   desc:"The largest Islamic arts museum in Southeast Asia with over 7,000 artifacts spanning calligraphy, ceramics, textiles, metalwork, and beautifully detailed architectural scale models of famous mosques worldwide. The building itself is architecturally striking. World-class and genuinely surprising even if Islamic art isn't your primary interest.",
+   best:"Weekday mornings. Allow 2-3 hours",
+   access:"Walk from KL Sentral (15 min). Adjacent to Perdana Gardens and Masjid Negara",
+   tips:"The architectural models of mosques from around the world are the highlight. The museum cafe has great views. Combine with Masjid Negara (next door).",
+   wiki:"Islamic Arts Museum Malaysia",price:"RM14"},
+
+  {name:"Seri Negara",cat:"museum",crowd:2,lat:3.1410,lng:101.6890,
+   tag:"1913 colonial mansion that hosted Queen Elizabeth II — reopened Dec 2025 with new galleries",
+   desc:"A colonial mansion completed in 1913 that housed British rulers and later hosted Queen Elizabeth II during the 1989 Commonwealth summit. Reopened December 2025 after restoration, now featuring galleries tracing Malaysia's journey from colonial rule to independence.",
+   best:"Weekdays for fewer visitors. Newly reopened so may draw curious crowds",
+   access:"Near Perdana Botanical Gardens. Grab/taxi from KLCC (10 min)",
+   tips:"Freshly restored — this is a rare chance to see inside a building that was closed for years.",
+   wiki:"Seri Negara",price:"Check on visit"},
+
+  {name:"National Textile Museum",cat:"museum",crowd:1,lat:3.1493,lng:101.6938,
+   tag:"Mughal-style building (1896) with Malay, Chinese & Indian textile heritage — tourists skip it entirely",
+   desc:"Housed in a beautiful Mughal-style building that was originally the Federated Malay States Railways HQ (1896). Showcases Malaysia's rich textile heritage across Malay, Chinese, and Indian traditions. Most tourists walk right past it despite it being on Merdeka Square. Uncrowded and educational.",
+   best:"Any weekday. Near Merdeka Square",
+   access:"Walk from Masjid Jamek LRT (5 min). Right on Merdeka Square",
+   tips:"Quick visit (45 min). The building architecture is worth seeing even if textiles aren't your thing.",
+   wiki:"National Textile Museum Malaysia",price:"Free"},
+
+  {name:"National Museum (Muzium Negara)",cat:"museum",crowd:2,lat:3.1375,lng:101.6873,
+   tag:"Malaysia's main museum — prehistory through independence. Good first-day orientation",
+   desc:"Malaysia's main national museum since 1963. Covers Malaysian history from prehistory through the Malay sultanates, colonial era, to independence. Interactive galleries with artifacts, dioramas, and multimedia. Good orientation to understand the country's complex history before exploring the city.",
+   best:"Weekday mornings. Allow 1.5-2 hours",
+   access:"Muzium Negara MRT station or walk from KL Sentral (15 min)",
+   tips:"Good first-day activity to understand Malaysia's history before exploring. The galleries on colonial period and independence are most interesting.",
+   wiki:"National Museum Malaysia",price:"RM5"},
+
+  {name:"KL City Gallery",cat:"museum",crowd:3,lat:3.1487,lng:101.6941,
+   tag:"Colonial-era building with a massive architectural scale model of KL",
+   desc:"A charming colonial-era building at the edge of Merdeka Square housing a large architectural scale model of Kuala Lumpur, historical exhibits, maps, and art. Good for understanding the city's layout and development before exploring on foot. The 'I Love KL' sign outside is one of KL's most photographed spots.",
+   best:"Weekday mornings. Quick visit (30-45 min)",
+   access:"Walk from Masjid Jamek LRT (5 min). At Merdeka Square",
+   tips:"The scale model of KL is genuinely impressive. The gift shop has interesting local crafts.",
+   wiki:"Kuala Lumpur City Gallery",price:"RM10"},
+
+  {name:"ICC Pudu (Imbi Market)",cat:"food",crowd:2,lat:3.1370,lng:101.7110,
+   tag:"100+ hawker stalls — where KL actually eats breakfast. No tourist has found this place",
+   desc:"Over 100 hawker stalls on the ground floor of a working wet market. This is where real KL eats breakfast. Must-try: Ah Fook Chee Cheong Fun (curry gravy), Ann Nasi Lemak (pork skin curry version), Mee Halia ginger wine noodles (RM9), IMBI Kueh Bakul. Opens at 5:30am and many stalls sell out by noon. Closed Mondays.",
+   best:"Before 10am for full selection. CLOSED ON MONDAYS",
+   access:"Grab from KLCC (10 min). In the Pudu district",
+   tips:"Come hungry. Everything is under RM12. Cash only. The wet market upstairs is worth a walk-through too.",
+   wiki:"hawker food Kuala Lumpur",price:"RM5-12 per dish"},
+
+  {name:"Jalan Alor",cat:"food",crowd:4,lat:3.1455,lng:101.7095,
+   tag:"KL's famous night food street — touristy but iconic, push deeper for better stalls",
+   desc:"The famous night food street of Bukit Bintang. Yes, it's touristy. But it's also genuinely lively and a quintessential KL experience. The trick is to skip the stalls with English menus and photos out front — push deeper into the street for the more authentic stalls at the back. Grilled chicken wings and noodles are the staples.",
+   best:"After 8pm. Peak atmosphere around 9-10pm",
+   access:"15-20 min walk from hotel. Or 1 LRT stop to Bukit Bintang",
+   tips:"Walk the full length. The best stalls are at the far end. Avoid seafood stalls (overpriced). The back alleys have hidden gems.",
+   wiki:"Jalan Alor Kuala Lumpur",price:"RM8-20 per dish"},
+
+  {name:"Kampung Baru Night Market",cat:"food",crowd:3,lat:3.1620,lng:101.7000,
+   tag:"Saturday night cultural food experience — satay, ayam percik, traditional kuih under the Petronas Towers",
+   desc:"A Saturday night market in KL's last remaining Malay village. Traditional wooden houses in the shadow of the Petronas Towers create a surreal backdrop. The ayam percik (flame-grilled spiced chicken) is not to be missed. Also: satay, roti john, nasi lemak, mee goreng mamak, and traditional Malay sweets (kuih-muih).",
+   best:"Saturdays only, 6pm-11pm. Go at 6pm to beat the 8pm rush",
+   access:"Walk from KLCC via Saloma Link (15 min). Kampung Baru LRT station",
+   tips:"This is a cultural experience as much as a food one. Combine with the Saloma Link night walk from KLCC.",
+   wiki:"Kampung Baru night market",price:"RM3-10 per item"},
+
+  {name:"Lot 10 Hutong",cat:"food",crowd:3,lat:3.1482,lng:101.7130,
+   tag:"Legendary hawker operators under one air-conditioned roof — your midday heat escape",
+   desc:"A curated food court in the basement of Lot 10 mall that gathered famous hawker stall operators under one roof. Kim Lian Kee Hokkien Mee (dark soy wok noodles), Soong Kee Beef Ball Noodles, and various curry and noodle stalls. Yes, it's in a mall. But the stall operators are legit legends. Air-conditioned — a legitimate advantage in KL's equatorial heat.",
+   best:"2-3pm or after 8pm to avoid lunch rush. Open daily",
+   access:"15-20 min walk from hotel. Bukit Bintang MRT/Monorail",
+   tips:"Good air-conditioned midday escape. Try Kim Lian Kee Hokkien Mee — dark soy wok-fried noodles that define KL's Hokkien style.",
+   wiki:"Hokkien mee Kuala Lumpur",price:"RM10-18 per dish"},
+
+  {name:"Restoran Kin Kin",cat:"food",crowd:4,lat:3.1608,lng:101.6972,
+   tag:"THE birthplace of chilli pan mee (invented 1985) — flat noodles, chilli flakes, fried egg",
+   desc:"The restaurant that invented chilli pan mee in 1985. Owner Tan Kok Hong created a dish that changed KL's food landscape: flat hand-torn noodles, minced pork, fried shallots, a poached egg, and a mountain of dried chilli flakes. The texture contrast is addictive. Perpetually packed — the queue IS the review.",
+   best:"Go at opening (7:30am) or mid-afternoon (3-4pm). Closes 9pm weekdays, 4pm weekends",
+   access:"Grab from KLCC (10 min). 40 Jalan Dewan Sultan Sulaiman, near Kampung Baru",
+   tips:"Add as much chilli flakes as you dare. Break the egg yolk and mix everything. The rival Super Kitchen is directly across the street — try both.",
+   wiki:"pan mee Malaysia",price:"RM7-10"},
+
+  {name:"Soong Kee Beef Ball Noodles",cat:"food",crowd:3,lat:3.1445,lng:101.6963,
+   tag:"Since 1945 — Hakka-style dry beef noodles with handmade springy beef balls",
+   desc:"Operating since 1945. Founded by Siew Koy Soong, inspired by Hakka beef noodles from Tai Po, Hong Kong. Order the dry beef noodles with minced beef sauce plus a side bowl of clear broth with handmade beef balls. The balls are legendary — springy, dense, and full of flavor.",
+   best:"Go at opening to avoid the perpetual queue. Lunch is busiest",
+   access:"Walk from Pasar Seni LRT (5 min). 86 Jalan Tun H.S. Lee, opposite UOB Bank",
+   tips:"The original location in Chinatown is the one to visit. The queue is part of the experience.",
+   wiki:"beef ball noodles Malaysia",price:"RM8-12"},
+
+  {name:"Satay Zulkifli",cat:"food",crowd:3,lat:3.1615,lng:101.7005,
+   tag:"Charcoal-grilled lamb satay in Kampung Baru — RM1.30/stick, open 3pm-11pm",
+   desc:"A Kampung Baru institution specializing in beef and lamb satay grilled over charcoal. The lamb (RM1.30/stick) is marinated in a secret spice blend and grilled to tender perfection. The peanut sauce is thick and creamy. Order 15-20 sticks with nasi impit (compressed rice). Kampung Baru at night with satay smoke in the air is quintessential KL.",
+   best:"Early evening (5-6pm) before the 7-10pm rush",
+   access:"Walk from KLCC via Saloma Link (15 min). 5 Jalan Besar, Kampung Baru",
+   tips:"Order both beef and lamb. The peanut sauce is the star. Combine with a walk through Kampung Baru village.",
+   wiki:"Satay Malaysia",price:"RM1-1.50 per stick"},
+
+  {name:"Nasi Lemak Wanjo",cat:"food",crowd:3,lat:3.1618,lng:101.7002,
+   tag:"Since 1963 — Kampung Baru's legendary nasi lemak with rich beef rendang",
+   desc:"Established 1963. The most famous nasi lemak in Kampung Baru. The beef rendang is slow-cooked until deeply rich, and the sambal is legendary. A large tin-roofed restaurant with zero pretense and maximum flavor. The eternal rival of Nasi Lemak Antarabangsa (est. 1973) down the road.",
+   best:"Dinner and late evening (the main crowd). Go at 5:30pm for fewer people",
+   access:"Walk from KLCC via Saloma Link (15 min). Jalan Raja Muda Musa, Kampung Baru",
+   tips:"Order nasi lemak + beef rendang + sambal + fried chicken. Try both Wanjo and Antarabangsa (nearby) to pick your side.",
+   wiki:"Nasi lemak Malaysia",price:"RM8-12"},
+
+  {name:"Merchant's Lane",cat:"cafe",crowd:3,lat:3.1448,lng:101.6964,
+   tag:"Hidden behind a green door in Chinatown — pre-war building upstairs, Malaysian fusion food",
+   desc:"One of the cafes that revived Chinatown's food scene. Hidden behind a nondescript green door on Petaling Street. Climb the stairs to find a beautifully restored pre-war space with wooden elements and colorful furnishings. Malaysian-flavored cafe fare: chicken rendang sandwich, soft-shell crab pasta with curry sauce. The sense of discovery is part of the charm.",
+   best:"Weekday afternoons. Weekends are packed",
+   access:"Walk from Pasar Seni MRT (5 min). Look for the old green door on Jalan Petaling",
+   tips:"The discovery factor — finding the unmarked green door — is half the fun. Good afternoon coffee-and-cake stop during a Chinatown walk.",
+   wiki:"Merchant Lane cafe Kuala Lumpur",price:"RM15-30"},
+
+  {name:"Chocha Foodstore",cat:"cafe",crowd:2,lat:3.1450,lng:101.6968,
+   tag:"Century-old former brothel turned modern Malaysian restaurant — exposed brick, serene garden",
+   desc:"Housed in a century-old building that was formerly the Mah Lian Hotel (actually a brothel). The heritage architecture is stunning — exposed brick, original tiles, and a serene inner garden. Modern Malaysian cuisine with locally sourced ingredients and natural wine. The building tells a story at every turn.",
+   best:"Weekday lunch for a peaceful experience. Evenings are busier",
+   access:"Walk from Pasar Seni MRT (5 min). 156 Jalan Petaling",
+   tips:"The garden area is the best spot. One of three hidden gems (with Merchant's Lane and PS150) that revived this stretch of Chinatown.",
+   wiki:"heritage shophouse Chinatown Kuala Lumpur",price:"RM20-40"},
+
+  {name:"Piu Piu Piu",cat:"cafe",crowd:1,lat:3.1382,lng:101.6922,
+   tag:"270 sqft espresso bar inside the Zhongshan indie arts building — famous cold brew",
+   desc:"A tiny 270-square-foot espresso bar tucked inside the Zhongshan Building arts hub. Famous among KL coffee insiders for their cold brew. Surrounded by artists, musicians, and designers in a converted 1950s building. This is not a place you stumble upon — you have to know about it.",
+   best:"Weekday afternoons. Combine with exploring the Zhongshan Building",
+   access:"Grab from KLCC (10 min). Inside the Zhongshan Building, Jalan Rotan, Kampung Attap",
+   tips:"Feels full with 5 people. Come for the cold brew, stay for the creative atmosphere of the building.",
+   wiki:"coffee culture Kuala Lumpur",price:"RM10-15"},
+
+  {name:"Broom",cat:"cafe",crowd:2,lat:3.1460,lng:101.7100,
+   tag:"Heritage home cafe with original pre-war tiles and windows — like coffee at your grandparent's house",
+   desc:"Nestled inside a two-storey heritage home in Bukit Bintang. Original floor tiles and windows have been carefully retained. The age of the building seeps through every detail — worn wooden stairs, faded walls with character. Feels like drinking coffee in someone's beautifully aged grandparent's house.",
+   best:"Any weekday. The atmosphere is the product",
+   access:"Walk from Bukit Bintang (5 min). Or 15 min walk from hotel",
+   tips:"The building is the experience more than the coffee. Bring a book.",
+   wiki:"heritage cafe Kuala Lumpur",price:"RM12-20"},
+
+  {name:"Mee Tarik Restoran",cat:"nightlife",crowd:3,lat:3.1445,lng:101.6955,
+   tag:"Hand-pulled beef noodles until 2am — watch them stretch dough to order in Chinatown",
+   desc:"'Mee tarik' means hand-pulled noodles. Watch them stretch the dough to order — the technique is mesmerizing. Rich beef broth with tender beef slices and those irregularly thick, chewy, hand-pulled noodles. Open until 2am, making it the perfect Chinatown supper spot.",
+   best:"Late night (10pm-midnight) for the full atmosphere",
+   access:"Grab from KLCC (10 min). Jalan Sultan, Chinatown",
+   tips:"Ask for a seat where you can watch the noodle pulling. The beef broth warms you up after a long day of walking.",
+   wiki:"hand pulled noodles",price:"RM10-15"},
+
+  {name:"Nasi Kandar Pelita",cat:"nightlife",crowd:3,lat:3.1555,lng:101.7140,
+   tag:"24-hour mamak closest to your hotel — roti canai and teh tarik at 3am is a Malaysian ritual",
+   desc:"Your nearest 24-hour mamak restaurant, walkable from the Novotel. Nasi kandar, roti canai, teh tarik, maggi goreng — all the mamak classics. The 2-3am window is when the real KL comes alive here: taxi drivers, night-shift workers, and insomniacs sharing curries under fluorescent lights.",
+   best:"2-4am for the authentic late-night mamak experience (and shortest queues)",
+   access:"5 min walk from hotel. Jalan Ampang, near KLCC",
+   tips:"Order 'kuah campur banjir' — flood the rice with mixed curries. Watch the roti canai guy work. Order teh tarik (pulled milk tea).",
+   wiki:"Mamak stall Malaysia",price:"RM10-15"},
+
+  {name:"Devi's Corner",cat:"nightlife",crowd:3,lat:3.1298,lng:101.6715,
+   tag:"Bangsar's midnight institution — the place locals go to 'lepak' (hang out) after everything closes",
+   desc:"The legendary Bangsar late-night mamak. Usually packed at midnight with KL's night owls. Roti canai, nasi lemak, naan, tandoori chicken — classic mamak fare done consistently well. This is where people go to 'lepak' (Malaysian for hanging out/chilling) when the rest of the city sleeps.",
+   best:"Midnight to 2am for peak social energy. Or go early for calmer vibes",
+   access:"Grab from KLCC (15 min). Bangsar area",
+   tips:"Come for the vibe as much as the food. This is a social institution more than a restaurant.",
+   wiki:"mamak restaurant Malaysia",price:"RM8-15"}
+];
+
+// ===== STATE =====
+const imgCache = {};
+let activeCat = "all";
+let activeCrowd = 0;
+let searchQuery = "";
+let currentView = "grid";
+let leafletMap = null;
+let markers = [];
+let currentModal = null;
+let carouselIndex = 0;
+
+// ===== UTILS =====
+function getDist(lat, lng){
+  const R=6371,dLat=(lat-HOTEL_LAT)*Math.PI/180,dLon=(lng-HOTEL_LNG)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(HOTEL_LAT*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2;
+  return(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
+}
+
+// ===== INIT =====
+document.addEventListener("DOMContentLoaded", () => {
+  renderStats();
+  renderCatFilters();
+  renderGrid();
+  document.getElementById("search").addEventListener("input", e => {
+    searchQuery = e.target.value.toLowerCase();
+    renderGrid();
+    if(leafletMap) renderMarkers();
+  });
+});
+
+function renderStats(){
+  const cats = {};
+  places.forEach(p => cats[p.cat] = (cats[p.cat]||0)+1);
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="stat-num">${places.length}</div><div class="stat-label">Places</div></div>
+    <div class="stat"><div class="stat-num">${cats.food||0}</div><div class="stat-label">Food Spots</div></div>
+    <div class="stat"><div class="stat-num">${cats.cafe||0}</div><div class="stat-label">Cafes</div></div>
+    <div class="stat"><div class="stat-num">${places.filter(p=>p.crowd<=2).length}</div><div class="stat-label">Low Crowd</div></div>
+    <div class="stat"><div class="stat-num">${cats.cultural||0}</div><div class="stat-label">Cultural</div></div>
+  `;
+}
+
+function renderCatFilters(){
+  const cats = ["all",...new Set(places.map(p=>p.cat))];
+  document.getElementById("catFilters").innerHTML = cats.map(c => {
+    const meta = CAT_META[c];
+    const dot = c==="all" ? "" : `<span class="pill-dot" style="background:${meta?.color||'#888'}"></span>`;
+    return `<button class="pill ${c===activeCat?'active':''}" onclick="filterCat('${c}')">${dot}${c==="all"?"All":meta?.label||c}</button>`;
+  }).join("");
+}
+
+function filterCat(cat){
+  activeCat = cat;
+  renderCatFilters();
+  renderGrid();
+  if(leafletMap) renderMarkers();
+}
+
+function filterCrowd(level){
+  activeCrowd = level;
+  document.querySelectorAll(".crowd-pill").forEach(el => {
+    el.classList.toggle("active", parseInt(el.dataset.crowd) === level);
+  });
+  renderGrid();
+  if(leafletMap) renderMarkers();
+}
+
+function getFiltered(){
+  return places.filter(p => {
+    if(activeCat !== "all" && p.cat !== activeCat) return false;
+    if(activeCrowd > 0 && p.crowd > activeCrowd) return false;
+    if(searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.tag.toLowerCase().includes(searchQuery)) return false;
+    return true;
+  });
+}
+
+// ===== GRID =====
+function renderGrid(){
+  const filtered = getFiltered();
+  const grid = document.getElementById("grid");
+  if(!filtered.length){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">&#128270;</div><div class="empty-text">No places match your filters</div></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const idx = places.indexOf(p);
+    const dist = getDist(p.lat, p.lng);
+    const meta = CAT_META[p.cat];
+    return `
+    <div class="card" onclick="openModal(${idx})" data-idx="${idx}">
+      <div class="card-img-wrap" id="img-${idx}">
+        <div class="card-fallback" style="background:${IMG_FALLBACKS[p.cat]}">${CAT_EMOJIS[p.cat]||""}</div>
+        <div class="shimmer"></div>
+        <div class="card-badges">
+          <span class="cat-badge cat-badge-light" style="border-left:3px solid ${meta?.color||'#888'}">${meta?.label||p.cat}</span>
+          <span class="crowd-badge" style="color:${CROWD_COLORS[p.crowd]}">${CROWD_LABELS[p.crowd]}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-tag">${p.tag}</div>
+        <div class="card-footer">
+          <span class="card-dist">&#128205; ${dist} km</span>
+          ${p.price ? `<span class="card-price">${p.price}</span>` : ""}
+          <span class="card-action">Explore &#8594;</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  observeReveal();
+  observeImages();
+}
+
+// ===== SCROLL REVEAL =====
+const revealObs = new IntersectionObserver((entries) => {
+  const visible = entries.filter(e => e.isIntersecting);
+  visible.forEach((entry, i) => {
+    setTimeout(() => entry.target.classList.add('revealed'), i * 60);
+    revealObs.unobserve(entry.target);
+  });
+}, {threshold:0.05, rootMargin:'40px'});
+
+function observeReveal(){
+  document.querySelectorAll('.card:not(.revealed)').forEach(card => revealObs.observe(card));
+}
+
+// ===== IMAGE LOADING =====
+const imgObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const idx = parseInt(entry.target.dataset.idx);
+      loadCardImage(idx);
+      imgObs.unobserve(entry.target);
+    }
+  });
+}, {rootMargin:"200px"});
+
+function observeImages(){
+  document.querySelectorAll(".card").forEach(card => imgObs.observe(card));
+}
+
+async function loadCardImage(idx){
+  const p = places[idx];
+  const wrap = document.getElementById(`img-${idx}`);
+  if(!wrap) return;
+  let urls = imgCache[idx];
+  if(!urls){
+    urls = await fetchWikiImages(p.wiki || p.name);
+    imgCache[idx] = urls;
+  }
+  if(urls.length > 0){
+    const img = document.createElement("img");
+    img.className = "card-img";
+    img.loading = "lazy";
+    img.alt = p.name;
+    img.src = urls[0];
+    img.onload = () => { img.classList.add("loaded"); };
+    img.onerror = () => img.remove();
+    wrap.appendChild(img);
+    const shimmer = wrap.querySelector(".shimmer");
+    if(shimmer) setTimeout(() => shimmer.remove(), 600);
+  } else {
+    const shimmer = wrap.querySelector(".shimmer");
+    if(shimmer) shimmer.remove();
+  }
+}
+
+async function fetchWikiImages(query){
+  try {
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(query)}&gsrlimit=8&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=800&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(!data.query?.pages) return [];
+    return Object.values(data.query.pages)
+      .filter(page => {
+        const info = page.imageinfo?.[0];
+        if(!info) return false;
+        if(!info.mime?.startsWith("image/jpeg") && !info.mime?.startsWith("image/png")) return false;
+        if(info.width < 400 || info.height < 300) return false;
+        const t = (page.title||"").toLowerCase();
+        if(/icon|logo|map|diagram|flag|coat.?of.?arms|seal|emblem|symbol|watermark|stub|placeholder/.test(t)) return false;
+        return true;
+      })
+      .sort((a,b) => (b.imageinfo[0].width||0) - (a.imageinfo[0].width||0))
+      .slice(0, 4)
+      .map(page => page.imageinfo[0].thumburl || page.imageinfo[0].url);
+  } catch(e){ return []; }
+}
+
+// ===== MAP =====
+function setView(view){
+  currentView = view;
+  document.getElementById("gridBtn").classList.toggle("active", view==="grid");
+  document.getElementById("mapBtn").classList.toggle("active", view==="map");
+  document.getElementById("grid").style.display = view==="grid" ? "grid" : "none";
+  document.getElementById("map-container").style.display = view==="map" ? "block" : "none";
+  if(view==="map" && !leafletMap) initMap();
+  if(view==="map") renderMarkers();
+}
+
+function initMap(){
+  leafletMap = L.map("map",{zoomControl:true}).setView([3.152,101.700],13);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom:19
+  }).addTo(leafletMap);
+  L.circleMarker([HOTEL_LAT,HOTEL_LNG],{
+    radius:10,fillColor:'#C17F59',fillOpacity:1,color:'#fff',weight:3,opacity:1
+  }).addTo(leafletMap).bindPopup(`<div class="popup-name">&#127976; Novotel KL City Centre</div><div class="popup-tag">Your hotel — Jalan Kia Peng</div>`);
+  renderMarkers();
+}
+
+function renderMarkers(){
+  markers.forEach(m => leafletMap.removeLayer(m));
+  markers = [];
+  getFiltered().forEach(p => {
+    const color = CAT_META[p.cat]?.color || "#888";
+    const m = L.circleMarker([p.lat,p.lng],{
+      radius:7,fillColor:color,fillOpacity:0.9,color:'#fff',weight:2,opacity:1
+    }).addTo(leafletMap);
+    m.bindPopup(`<div class="popup-name">${p.name}</div><div class="popup-tag">${p.tag}</div><a class="popup-link" href="#" onclick="event.preventDefault();openModal(${places.indexOf(p)})">View details &rarr;</a>`);
+    markers.push(m);
+  });
+}
+
+// ===== MODAL =====
+async function openModal(idx){
+  currentModal = idx;
+  carouselIndex = 0;
+  const p = places[idx];
+  const overlay = document.getElementById("modal");
+  const carousel = document.getElementById("carousel");
+  const dots = document.getElementById("carouselDots");
+  const body = document.getElementById("modalBody");
+  let urls = imgCache[idx];
+  if(!urls){
+    urls = await fetchWikiImages(p.wiki || p.name);
+    imgCache[idx] = urls;
+  }
+  if(urls.length > 0){
+    carousel.style.display = "block";
+    carousel.innerHTML = `
+      ${urls.map((u,i) => `<img src="${u}" alt="${p.name}" class="${i===0?'active':''}">`).join("")}
+      ${urls.length > 1 ? `<button class="carousel-btn prev" onclick="carouselNav(-1)">&#8249;</button><button class="carousel-btn next" onclick="carouselNav(1)">&#8250;</button>` : ""}
+    `;
+    dots.innerHTML = urls.length > 1 ? urls.map((u,i) => `<button class="carousel-dot ${i===0?'active':''}" onclick="carouselGo(${i})"></button>`).join("") : "";
+    dots.style.display = urls.length > 1 ? "flex" : "none";
+  } else {
+    carousel.style.display = "block";
+    carousel.innerHTML = `<div style="width:100%;height:100%;background:${IMG_FALLBACKS[p.cat]};display:flex;align-items:center;justify-content:center;font-size:3.5rem;opacity:0.25">${CAT_EMOJIS[p.cat]||""}</div>`;
+    dots.style.display = "none";
+  }
+  const meta = CAT_META[p.cat];
+  const dist = getDist(p.lat, p.lng);
+  const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + " Kuala Lumpur")}`;
+  body.innerHTML = `
+    <div class="modal-name">${p.name}</div>
+    <div class="modal-meta">
+      <span class="cat-badge cat-badge-light" style="border-left:3px solid ${meta?.color||'#666'};font-size:0.68rem">${meta?.label||p.cat}</span>
+      <span class="crowd-badge" style="color:${CROWD_COLORS[p.crowd]};font-size:0.68rem;background:${CROWD_COLORS[p.crowd]}15">${CROWD_LABELS[p.crowd]} crowds</span>
+      <span style="font-size:0.72rem;color:var(--text-tri)">&#128205; ${dist} km from hotel</span>
+      ${p.price ? `<span style="color:var(--accent);font-size:0.72rem;font-weight:600">${p.price}</span>` : ""}
+    </div>
+    <div class="modal-desc">${p.desc}</div>
+    <div class="info-grid">
+      <div class="info-card"><div class="info-label">&#128336; Best Time</div><div class="info-value">${p.best||"—"}</div></div>
+      <div class="info-card"><div class="info-label">&#128651; Getting There</div><div class="info-value">${p.access||"—"}</div></div>
+      <div class="info-card" style="grid-column:1/-1"><div class="info-label">&#128161; Tips</div><div class="info-value">${p.tips||"—"}</div></div>
+    </div>
+    <a class="maps-btn" href="${gmapsUrl}" target="_blank" rel="noopener">&#128205; Open in Google Maps</a>
+  `;
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  document.getElementById("modal").classList.remove("open");
+  document.body.style.overflow = "";
+  currentModal = null;
+}
+
+function carouselNav(dir){
+  const imgs = document.querySelectorAll("#carousel img");
+  if(!imgs.length) return;
+  imgs[carouselIndex].classList.remove("active");
+  carouselIndex = (carouselIndex + dir + imgs.length) % imgs.length;
+  imgs[carouselIndex].classList.add("active");
+  updateDots();
+}
+
+function carouselGo(idx){
+  const imgs = document.querySelectorAll("#carousel img");
+  if(!imgs.length) return;
+  imgs[carouselIndex].classList.remove("active");
+  carouselIndex = idx;
+  imgs[carouselIndex].classList.add("active");
+  updateDots();
+}
+
+function updateDots(){
+  document.querySelectorAll(".carousel-dot").forEach((d,i) => d.classList.toggle("active", i===carouselIndex));
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape") closeModal();
+  if(currentModal !== null){
+    if(e.key === "ArrowLeft") carouselNav(-1);
+    if(e.key === "ArrowRight") carouselNav(1);
+  }
+});
+</script>
+</body>
+</html>

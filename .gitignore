@@ -1,0 +1,8 @@
+.DS_Store
+.claude/
+.mcp.json
+.playwright-mcp/
+mobile-*.png
+test-nanobanana*
+kl-explorer-*.png
+kl-explorer-v2-*.png
