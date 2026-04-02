@@ -13,14 +13,18 @@ Arrive 1:20pm. Immigration + Grab to hotel, realistically ready by ~2:30pm.
 All walkable, stay on foot the whole afternoon.
 
 1. **Sin Sze Si Ya Temple** — KL's oldest Taoist temple (1864), built by city founder Yap Ah Loy. Most tourists walk right past it. Low crowd.
-2. **Kwai Chai Hong** — Restored pre-war alley with murals depicting 1960s daily life. QR codes on each mural for audio stories. Name means "Little Demon Alley."
-3. **Lah Lah Land** (Jalan Petaling) — The souvenir shop. Graphic tees ("Roti Canai Connoisseur", "4am Mamak Supper Club"), postcards, modern Malaysian design. Better than generic Petaling Street magnets. Quick stop.
-4. **REXKL area** — Vintage shops, bookstores, cafes in one stretch. Browse and absorb.
+2. **Sri Mahamariamman Temple** — Oldest Hindu temple in KL (1873). Ornate gopuram with gold and deity carvings. Same street as Sin Sze Si Ya. Free entry, remove shoes.
+3. **Kwai Chai Hong** — Restored pre-war alley with murals depicting 1960s daily life. QR codes on each mural for audio stories. Name means "Little Demon Alley."
+4. **Lah Lah Land** (Jalan Petaling) — The souvenir shop. Graphic tees ("Roti Canai Connoisseur", "4am Mamak Supper Club"), postcards, modern Malaysian design. Better than generic Petaling Street magnets. Quick stop.
+5. **REXKL area** — Vintage shops, bookstores, cafes in one stretch. Browse and absorb.
 
 ### ~5:30pm — Grab to Kampung Baru for Dinner
 
 - **Satay Zulkifli** — Beef/lamb satay RM1.30/stick, charcoal-grilled, opens 3pm. The satay smoke in the air at dusk is peak KL.
 - Walk to **Nasi Lemak Wanjo** (est. 1963) for beef rendang, or its rival **Nasi Lemak Antarabangsa** (est. 1973) next door. Try both if hungry.
+
+### ~8:00pm — Saloma Link Bridge
+Lit-up pedestrian bridge connecting Kampung Baru to KLCC. On your route home — zero detour. 5 min walk across.
 
 ### ~8:30pm — Back to Hotel
 Save evening energy for April 4. Jet lag buffer.
@@ -52,6 +56,9 @@ All walkable between each other. This is the colonial/founding history layer —
 - **National Textile Museum** — Mughal-style building (1896), free entry. Malaysia's textile heritage. Virtually no visitors.
 - **Masjid Jamek** — KL's oldest mosque (1909) at the confluence of the Klang and Gombak rivers — the exact spot where KL was founded. Recently restored with landscaping and fountains. **Note: It's Friday. Go after 2:30pm to avoid Jumu'ah prayer time.**
 
+### ~3:30pm — Loke Mansion
+Ornate whitewashed mansion (1892) of tin magnate Loke Yew, once the richest man in Malaya. 10 min walk from Masjid Jamek, on the way toward Chow Kit. Very low crowd. Exterior always viewable.
+
 ### ~6:00pm — Dinner in Chow Kit
 The reels and the research guide both point to Chow Kit as the neighborhood to know. Pick one:
 - **Limapulo** — Nyonya cuisine. Local following, not a tourist destination.
@@ -67,6 +74,9 @@ This is the big one. Four cultural stops, a garden, and a speakeasy.
 
 ### 9:00am — National Museum (Muzium Negara)
 Malaysian history from prehistory to independence. Perak Man skeleton and colonial era galleries are the highlights. RM5 entry, 1.5 hours. Opens 9am.
+
+### 10:30am — Masjid Negara (National Mosque)
+Malaysia's national mosque, right next to the National Museum — walk over. Striking modernist architecture with 73m minaret, 16-pointed star roof, and reflecting pools. Free entry, modest clothing provided. Closed during prayer times.
 
 ### 11:00am — Rumah Penghulu Abu Seman
 Traditional Malay wooden heritage house. Guided tour at 11am (the one exception to the no-guided-tours rule — it's the only way in and genuinely worth it). 45 min, RM20. Intimate, uncrowded, rare. **This is the only viable day — closed Sunday and Monday.**
@@ -105,6 +115,7 @@ Most underrated museum in KL. Malaysian monetary and economic history done with 
 ### 11:30am — Grab to Brickfields (Little India)
 - **Sri Kandaswamy Temple** — South Indian Dravidian-style gopuram covered in colorful Hindu deity sculptures. Low crowd.
 - **Buddhist Maha Vihara** — One of KL's oldest Buddhist temples. Peaceful grounds, serene meditation hall.
+- **Wat Chetawan** — Thai Buddhist temple with ornate golden exterior. A different aesthetic from the Sinhalese and Indian temples nearby. 5 min walk.
 
 ### 12:30pm — Banana Leaf Rice Lunch
 Pick one:
