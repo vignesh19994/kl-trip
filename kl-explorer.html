@@ -182,23 +182,38 @@ a{color:var(--accent);text-decoration:none}
 
 /* Responsive */
 @media(max-width:768px){
-  .hero{padding:40px 20px 28px}
+  .hero{padding:28px 16px 20px}
   .hero-title{font-size:2.8rem}
-  .hero::after{font-size:10rem;right:-12px}
-  .hero-stats{gap:20px}
-  .controls-inner{padding:0 20px}
-  .grid{grid-template-columns:1fr;padding:16px 20px;gap:18px}
-  .modal{max-height:95vh;border-radius:16px 16px 0 0;margin-top:auto;align-self:flex-end}
+  .hero::after{font-size:8rem;right:-8px}
+  .hero-subtitle{font-size:0.9rem}
+  .hero-meta{gap:8px}
+  .meta-chip{font-size:0.72rem;padding:5px 10px}
+  .hero-stats{gap:16px}
+  .stat-num{font-size:1.6rem}
+  .stat-label{font-size:0.58rem}
+  .controls-inner{padding:0 16px}
+  .filters-row{gap:6px}
+  .pill{padding:6px 12px;font-size:0.72rem}
+  .grid{grid-template-columns:1fr;padding:16px;gap:16px}
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal{max-width:100%;max-height:90vh;border-radius:16px 16px 0 0;margin-top:auto}
+  .modal-body{padding:0 20px 24px}
   .info-grid{grid-template-columns:1fr}
-  #map-container{margin:0 20px 20px;height:70vh}
-  .footer{padding:32px 20px 40px}
+  #map-container{margin:0 16px 16px;height:70vh;border-radius:12px}
+  .footer{padding:24px 16px 32px}
 }
 @media(max-width:480px){
-  .hero-title{font-size:2.2rem}
-  .hero-stats{flex-wrap:wrap;gap:16px}
-  .controls-row{flex-direction:column;align-items:stretch}
+  .hero{padding:20px 16px 16px}
+  .hero-title{font-size:2rem}
+  .hero-stats{flex-wrap:wrap;gap:12px}
+  .meta-chip.meta-chip-long{font-size:0.65rem}
+  .controls-row{flex-direction:column;align-items:stretch;gap:8px}
+  .search-wrap{min-width:100%}
   .crowd-filters{justify-content:center}
   .view-toggle{justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
 }
 </style>
 </head>
@@ -212,9 +227,9 @@ a{color:var(--accent);text-decoration:none}
     <h1 class="hero-title">KL Explorer</h1>
     <p class="hero-subtitle">Your curated guide to 48 handpicked places across Kuala Lumpur</p>
     <div class="hero-meta">
-      <span class="meta-chip">&#9992;&#65039; Apr 2 (DMK&#8594;KUL 1:20pm) &mdash; Apr 5 (KUL&#8594;DMK 7:40pm)</span>
-      <span class="meta-chip">&#127976; Novotel KL City Centre</span>
-      <span class="meta-chip">&#128197; 3 full days</span>
+      <span class="meta-chip meta-chip-long"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.1l5.4 3.2-3.5 3.5-2.1-.5c-.4-.1-.8 0-1 .3l-.2.2c-.2.3-.1.7.1.9l3.3 2.5 2.5 3.3c.2.3.6.4.9.1l.2-.2c.3-.3.4-.7.3-1l-.5-2.1 3.5-3.5 3.2 5.4c.2.4.7.5 1.1.3l.5-.3c.4-.2.6-.7.5-1.1z"/></svg> Apr 2-5, 2026</span>
+      <span class="meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Novotel KL City Centre</span>
+      <span class="meta-chip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> 3 full days</span>
     </div>
     <div class="hero-stats" id="stats"></div>
   </div>
@@ -248,7 +263,8 @@ a{color:var(--accent);text-decoration:none}
 </main>
 
 <footer class="footer">
-  <p>Built for your KL adventure &middot; April 2026</p>
+  <p><a href="kl-itinerary.html" style="color:var(--accent);font-weight:600">View Day-by-Day Itinerary &rarr;</a></p>
+  <p style="margin-top:8px">Built for your KL adventure &middot; April 2026</p>
   <p class="footer-sub">Images via Wikimedia Commons &middot; Maps by OpenStreetMap &amp; CARTO</p>
 </footer>
 
