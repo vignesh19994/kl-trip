@@ -104,6 +104,10 @@ a{color:var(--accent);text-decoration:none}
 .cat-badge-light{background:rgba(255,255,255,0.88);color:var(--text)}
 .crowd-badge{padding:4px 10px;border-radius:100px;font-size:0.65rem;font-weight:600;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(255,255,255,0.88)}
+.pick-badge{padding:4px 10px;border-radius:100px;font-size:0.6rem;font-weight:700;
+  background:rgba(212,168,83,0.9);color:#fff;backdrop-filter:blur(10px);letter-spacing:0.03em}
+.pick-pill{gap:4px}
+.pick-pill.active{background:var(--gold)!important;border-color:var(--gold)!important;color:#fff!important}
 .card-body{padding:16px 18px 18px}
 .card-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;
   letter-spacing:-0.01em;margin-bottom:4px;line-height:1.2}
@@ -262,6 +266,7 @@ a{color:var(--accent);text-decoration:none}
         <button class="crowd-pill" data-crowd="1" onclick="filterCrowd(1)">Quiet</button>
         <button class="crowd-pill" data-crowd="2" onclick="filterCrowd(2)">Low</button>
         <button class="crowd-pill" data-crowd="3" onclick="filterCrowd(3)">Med</button>
+        <button class="crowd-pill pick-pill" id="pickBtn" onclick="togglePick()"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Picks</button>
       </div>
       <div class="view-toggle">
         <button class="view-btn active" id="gridBtn" onclick="setView('grid')">Grid</button>
@@ -823,7 +828,7 @@ const places = [
    wiki:"Jalan Tun HS Lee Kuala Lumpur",price:"RM10-20",
    reel:"\"Jalan HS Lee — this is more old KL. Temples, cafes — I love Timothy's, it's a slower pace.\""},
 
-  {name:"Village Park",cat:"food",crowd:3,lat:3.1567,lng:101.6562,
+  {name:"Village Park",cat:"food",crowd:3,lat:3.1567,lng:101.6562,pick:true,
    tag:"The nasi lemak that locals swear by — crispy ayam goreng with legendary sambal",
    desc:"Ask any KL local for the best nasi lemak and Village Park comes up almost every time. Famous for nasi lemak ayam goreng — fragrant coconut rice with perfectly crispy fried chicken and a sambal that has genuine depth. The grilled fish sauce is also excellent. Been around for decades and the quality hasn't slipped. Not a tourist trap — this is where Malaysians eat.",
    best:"Before 11am to avoid the lunch rush. Opens early",
@@ -868,7 +873,7 @@ const places = [
    wiki:"Peranakan cuisine Kuala Lumpur",price:"RM15-25",
    reel:"\"For Nyonya cuisine, go to Limapulo.\" — Recommended as the go-to for Peranakan food in the Chow Kit area."},
 
-  {name:"Restoran Heng Kee",cat:"food",crowd:2,lat:3.1378,lng:101.6912,
+  {name:"Restoran Heng Kee",cat:"food",crowd:2,lat:3.1378,lng:101.6912,pick:true,
    tag:"The bak kut teh locals actually eat — herbal pork rib soup that beats the tourist spots",
    desc:"While tourists line up at the famous bak kut teh chains, Malaysians vote for Restoran Heng Kee. The herbal pork rib soup here has genuine depth — the broth is darker and more intensely flavoured than the sanitised versions served at tourist-oriented spots. Both dry and soup versions are excellent. The three-dish combo with rice is the move.",
    best:"Morning or late lunch to avoid the midday rush",
@@ -895,7 +900,7 @@ const places = [
    wiki:"Kampung Attap Kuala Lumpur",price:"RM10-20",
    reel:"\"My top three spots would be Tom Le Baker for amazing sandwiches and muffins.\" — Part of the Kampung Attap creative hub near Zhongshan Building."},
 
-  {name:"Heung Ki",cat:"food",crowd:3,lat:3.1380,lng:101.6975,
+  {name:"Heung Ki",cat:"food",crowd:3,lat:3.1380,lng:101.6975,pick:true,
    tag:"Claypot chicken rice cooked over charcoal — smoky, crispy rice crust, Chinatown classic",
    desc:"A Chinatown institution for claypot chicken rice — rice cooked in a clay pot over charcoal fire until the bottom forms a crispy, smoky crust. The chicken is marinated with soy and sesame oil, and the combination of crispy rice, tender chicken, and Chinese sausage is deeply satisfying. A slow-cooked dish that's worth the wait.",
    best:"Dinner time — claypot rice takes 20-30 min to cook per order",
@@ -1039,7 +1044,7 @@ const places = [
    wiki:"Chin Swee Caves Temple",price:"Free",
    reel:"\"This is Chin Swee Temple on Genting Highland. The highlight is the 9-storey pagoda — it's very beautiful. Inside the temple, there is the Pha Yu Lai. It is another temple with a beautiful view — it's worth coming here once.\""},
 
-  {name:"Kedai Kopi Mee Bon",cat:"food",crowd:3,lat:3.1465,lng:101.7105,
+  {name:"Kedai Kopi Mee Bon",cat:"food",crowd:3,lat:3.1465,lng:101.7105,pick:true,
    tag:"Old-school Bukit Bintang kopitiam — wonton mee and local breakfast staples",
    desc:"A no-frills kopitiam near Bukit Bintang that locals have been eating at for decades. Known for its wonton mee and classic Malaysian coffee shop fare. Plastic chairs, fluorescent lights, zero pretense — the kind of place where the food speaks for itself.",
    best:"Morning or lunch. Gets crowded at peak hours",
@@ -1060,6 +1065,7 @@ const places = [
 const imgCache = {};
 let activeCat = "all";
 let activeCrowd = 0;
+let activePick = false;
 let searchQuery = "";
 let currentView = "grid";
 let leafletMap = null;
@@ -1127,9 +1133,17 @@ function getFiltered(){
   return places.filter(p => {
     if(activeCat !== "all" && p.cat !== activeCat) return false;
     if(activeCrowd > 0 && p.crowd > activeCrowd) return false;
+    if(activePick && !p.pick) return false;
     if(searchQuery && !p.name.toLowerCase().includes(searchQuery) && !p.tag.toLowerCase().includes(searchQuery)) return false;
     return true;
   });
+}
+
+function togglePick(){
+  activePick = !activePick;
+  document.getElementById("pickBtn").classList.toggle("active", activePick);
+  renderGrid();
+  if(leafletMap) renderMarkers();
 }
 
 // ===== GRID =====
@@ -1152,6 +1166,7 @@ function renderGrid(){
         <div class="card-badges">
           <span class="cat-badge cat-badge-light" style="border-left:3px solid ${meta?.color||'#888'}">${meta?.label||p.cat}</span>
           <span class="crowd-badge" style="color:${CROWD_COLORS[p.crowd]}">${CROWD_LABELS[p.crowd]}</span>
+          ${p.pick?'<span class="pick-badge">Pick</span>':''}
         </div>
       </div>
       <div class="card-body">
