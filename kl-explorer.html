@@ -175,6 +175,20 @@ a{color:var(--accent);text-decoration:none}
 .footer p{font-size:0.8rem;color:var(--text-tri);font-weight:400}
 .footer-sub{margin-top:4px;font-size:0.7rem;color:var(--border)}
 
+/* Locate */
+.locate-btn{position:absolute;top:10px;right:10px;z-index:1000;width:36px;height:36px;
+  border-radius:8px;border:2px solid rgba(0,0,0,0.2);background:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
+.locate-btn:hover{background:var(--surface-alt)}
+.locate-btn.active{background:rgba(59,130,246,0.1)}
+.locate-btn svg{color:var(--text-sec)}
+.locate-btn.active svg{color:#3B82F6}
+.user-dot{width:14px;height:14px;background:#3B82F6;border:3px solid #fff;border-radius:50%;
+  box-shadow:0 0 0 2px rgba(59,130,246,0.3),0 2px 6px rgba(0,0,0,0.3)}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
+.user-dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;
+  background:rgba(59,130,246,0.25);animation:pulse-ring 2s ease-out infinite}
+
 /* Animations */
 .hero{animation:fadeUp 0.7s ease both}
 .controls{animation:fadeUp 0.6s ease 0.15s both}
@@ -259,7 +273,12 @@ a{color:var(--accent);text-decoration:none}
 
 <main class="main">
   <div class="grid" id="grid"></div>
-  <div id="map-container"><div id="map"></div></div>
+  <div id="map-container" style="position:relative">
+    <div id="map"></div>
+    <button class="locate-btn" id="locateBtn" onclick="locateUser()" aria-label="Show my location" title="Show my location">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+    </button>
+  </div>
 </main>
 
 <footer class="footer">
@@ -1332,6 +1351,45 @@ document.addEventListener("keydown", e => {
     if(e.key === "ArrowRight") carouselNav(1);
   }
 });
+
+// ===== GEOLOCATION =====
+let userMarker=null;
+let userCircle=null;
+let watchId=null;
+
+function locateUser(){
+  if(!leafletMap&&!navigator.geolocation){return}
+  if(!leafletMap){setView('map')}
+  const btn=document.getElementById('locateBtn');
+
+  if(watchId!==null){
+    navigator.geolocation.clearWatch(watchId);
+    watchId=null;
+    if(userMarker){leafletMap.removeLayer(userMarker);userMarker=null}
+    if(userCircle){leafletMap.removeLayer(userCircle);userCircle=null}
+    btn.classList.remove('active');
+    return;
+  }
+
+  btn.classList.add('active');
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy;
+    const userIcon=L.divIcon({className:'',html:'<div class="user-dot" style="position:relative"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+
+    if(userMarker){
+      userMarker.setLatLng([lat,lng]);
+      userCircle.setLatLng([lat,lng]).setRadius(acc);
+    }else{
+      userMarker=L.marker([lat,lng],{icon:userIcon,zIndexOffset:1000}).addTo(leafletMap)
+        .bindPopup('<div class="popup-name">You are here</div>');
+      userCircle=L.circle([lat,lng],{radius:acc,color:'#3B82F6',fillColor:'#3B82F6',fillOpacity:0.1,weight:1}).addTo(leafletMap);
+      leafletMap.setView([lat,lng],15);
+    }
+  },err=>{
+    btn.classList.remove('active');
+    watchId=null;
+  },{enableHighAccuracy:true,maximumAge:10000,timeout:10000});
+}
 </script>
 </body>
 </html>
